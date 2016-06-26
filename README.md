@@ -1,6 +1,6 @@
 # zanmi
 
-FIXME: description
+HTTP authentication service built on [buddy](https://github.com/funcool/buddy).
 
 ## Developing
 
