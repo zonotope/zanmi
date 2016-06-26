@@ -5,18 +5,26 @@
 
   :min-lein-version "2.0.0"
 
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha7"]
+
+                 [buddy/buddy-auth "1.1.0"]
+                 [buddy/buddy-hashers "0.14.0"]
+                 [buddy/buddy-sign "1.1.0"]
+
+                 [org.postgresql/postgresql "9.4.1208"]
+
+                 [ring "1.4.0"]
+                 [ring/ring-defaults "0.2.0"]
+
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.0"]
                  [duct "0.7.0"]
-                 [environ "1.0.3"]
-                 [meta-merge "0.1.1"]
-                 [ring "1.4.0"]
-                 [ring/ring-defaults "0.2.0"]
-                 [ring-jetty-component "0.3.1"]
                  [duct/hikaricp-component "0.1.0"]
-                 [org.postgresql/postgresql "9.4.1208"]
-                 [duct/ragtime-component "0.1.4"]]
+                 [duct/ragtime-component "0.1.4"]
+                 [ring-jetty-component "0.3.1"]
+
+                 [environ "1.0.3"]
+                 [meta-merge "0.1.1"]]
 
   :plugins [[lein-environ "1.0.3"]]
 
