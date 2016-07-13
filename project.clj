@@ -20,7 +20,6 @@
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.0"]
                  [duct "0.7.0"]
-                 [duct/hikaricp-component "0.1.0"]
                  [duct/ragtime-component "0.1.4"]
                  [ring-jetty-component "0.3.1"]
 
