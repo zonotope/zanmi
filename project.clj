@@ -11,7 +11,8 @@
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
 
-                 [org.postgresql/postgresql "9.4.1208"]
+                 [postgres-component "0.1.0-SNAPSHOT"]
+                 [honeysql "0.7.0"]
 
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
