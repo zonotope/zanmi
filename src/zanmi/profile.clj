@@ -10,13 +10,13 @@
 (defn- get [db username]
   (database/get db username))
 
-(defn create! [db {:keys [username password] :as attrs}]
+(defn create! [db username password]
   (let [hashed-attrs (hash-password attrs)]
     (database/create! db hashed-attrs)))
 
-(defn update! [db {username :username, :as attrs}]
+(defn update! [db username new-password]
   (let [saved-profile (get db username)
-        updated-profile (merge saved-profile attrs)]
+        updated-profile (merge saved-profile {:p})]
     (database/update! db updated-profile)))
 
 (defn delete! [db username]
