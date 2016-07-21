@@ -8,7 +8,8 @@
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-            [zanmi.endpoint.example :refer [example-endpoint]]))
+            [zanmi.endpoint.profile :refer [profile-endpoint]]
+            [zanmi.endpoint.token :refer [token-endpoint]]))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
@@ -19,7 +20,9 @@
          :defaults   (meta-merge api-defaults
                                  {:params {:keywordize true
                                            :nested true}
-                                  :responses {:content-types true}})}
+                                  :responses {:content-types true}})
+
+         :secret "nobody knows this!"}
 
    :ragtime {:resource-path "zanmi/migrations"}})
 
@@ -30,9 +33,14 @@
          :http (jetty-server (:http config))
          :db   (database (:db config))
          :ragtime (ragtime (:ragtime config))
-         :example (endpoint-component example-endpoint))
+         :example (endpoint-component example-endpoint)
+         :profile (endpoint-component proifle-endpoint)
+         :token (endpoint-component (token-endpoint (:secret config))))
+
         (component/system-using
          {:http [:app]
           :app  [:example]
           :ragtime [:db]
-          :example [:db]}))))
+          :example [:db]
+          :profile [:db]
+          :token [:db]}))))

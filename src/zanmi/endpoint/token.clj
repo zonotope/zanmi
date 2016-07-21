@@ -8,9 +8,10 @@
       (select-keys [:id :username])
       (jwt/sign secret))))
 
-(defn token-endpoint [{:keys [db secret] :as endpoint}]
-  (context "/tokens" []
-    (POST "/" [user pass]
-      (let [profile (get db user)]
-        (when (valid? pass profile)
-          (build-token profile secret))))))
+(defn token-endpoint [secret]
+  (fn [{db :db :as endpoint}]
+    (context "/tokens" []
+      (POST "/" [user pass]
+        (let [profile (get db user)]
+          (when (valid? pass profile)
+            (build-token profile secret)))))))
