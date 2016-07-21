@@ -13,8 +13,14 @@
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
                       [wrap-defaults :defaults]]
+
          :not-found  "Resource Not Found"
-         :defaults   (meta-merge api-defaults {})}
+
+         :defaults   (meta-merge api-defaults
+                                 {:params {:keywordize true
+                                           :nested true}
+                                  :responses {:content-types true}})}
+
    :ragtime {:resource-path "zanmi/migrations"}})
 
 (defn new-system [config]
