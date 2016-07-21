@@ -7,7 +7,7 @@
       (dissoc :password)
       (assoc :hashed-password (hash/derive password))))
 
-(defn- get [db username]
+(defn get [db username]
   (database/get db username))
 
 (defn create! [db username password]
@@ -15,13 +15,11 @@
     (database/create! db hashed-attrs)))
 
 (defn update! [db username new-password]
-  (let [saved-profile (get db username)
-        updated-profile (merge saved-profile {:p})]
-    (database/update! db updated-profile)))
+  (let [saved-profile (get db username)]
+    (database/update! db username (hash-password {:password new-password}))))
 
 (defn delete! [db username]
   (database/delete! db username))
 
-(defn valid? [password username db]
-  (let [stored-password (:hashed-password (get db username))]
-    (hash/check password stored-password)))
+(defn valid? [password {:keys [hashed-password] :as profile}]
+  (hash/check password hashed-password)))
