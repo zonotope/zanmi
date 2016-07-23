@@ -19,7 +19,7 @@
                                     " ("
                                     "id UUID NOT NULL,"
                                     "username VARCHAR(32) NOT NULL,"
-                                    "hashed-password CHAR(60) NOT NULL"
+                                    "hashed_password CHAR(60) NOT NULL"
                                     ");"
                                     )])
       (postgres/create-database! db)
