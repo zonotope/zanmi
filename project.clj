@@ -55,6 +55,9 @@
                                   [kerodon "0.7.0"]]
                    :source-paths ["dev"]
                    :repl-options {:init-ns user}
-                   :env {:port "3000"}}
+                   :env {:port "3000"
+                         :database-host "localhost"
+                         :database-name "zanmi_dev"
+                         :database-password "zanmi-password"}}
 
    :project/test  {}})
