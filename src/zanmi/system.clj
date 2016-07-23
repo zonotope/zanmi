@@ -33,14 +33,12 @@
          :http (jetty-server (:http config))
          :db   (database (:db config))
          :ragtime (ragtime (:ragtime config))
-         :example (endpoint-component example-endpoint)
-         :profile (endpoint-component proifle-endpoint)
+         :profile (endpoint-component profile-endpoint)
          :token (endpoint-component (token-endpoint (:secret config))))
 
         (component/system-using
          {:http [:app]
-          :app  [:example]
+          :app  [:profile :token]
           :ragtime [:db]
-          :example [:db]
           :profile [:db]
           :token [:db]}))))

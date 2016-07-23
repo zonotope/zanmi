@@ -1,12 +1,12 @@
 (ns zanmi.endpoint.token
   (:require [zanmi.profile :refer [get valid?]]
             [buddy.sign.jwt :as jwt]
-            [compojure.core :refer [POST]]))
+            [compojure.core :refer [context POST]]))
 
 (defn- build-token [profile secret]
   (-> profile
       (select-keys [:id :username])
-      (jwt/sign secret))))
+      (jwt/sign secret)))
 
 (defn token-endpoint [secret]
   (fn [{db :db :as endpoint}]

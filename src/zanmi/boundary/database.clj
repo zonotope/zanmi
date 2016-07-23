@@ -6,7 +6,7 @@
     "create the database specified by `db`")
   (drop-database! [db]
     "drop the database specified by `db`")
-  (create! [db username password]
+  (create! [db attrs]
     "save the new profile for `username` with `password` in `db`")
   (get [db username]
     "get the profile for `username` from `db`")

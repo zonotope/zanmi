@@ -10,7 +10,7 @@
 (defn get [db username]
   (database/get db username))
 
-(defn create! [db username password]
+(defn create! [db {:keys [username password] :as attrs}]
   (let [hashed-attrs (hash-password attrs)]
     (database/create! db hashed-attrs)))
 
@@ -22,4 +22,4 @@
   (database/delete! db username))
 
 (defn valid? [password {:keys [hashed-password] :as profile}]
-  (hash/check password hashed-password)))
+  (hash/check password hashed-password))
