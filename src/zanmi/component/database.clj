@@ -8,6 +8,8 @@
             [com.stuartsierra.component :as component])
   (:import [postgres_component.core Postgres]))
 
+(defn- query [db-spec q]
+  (jdbc/query db-spec (sql/format q)))
 
 (let [pg-table :profiles]
   (extend-protocol database/Database
@@ -19,24 +21,21 @@
       (postgres/drop-database! db))
 
     (create! [{db-spec :spec} attrs]
-      (jdbc/insert! pg-table db-spec attrs))
+      (jdbc/insert! db-spec pg-table attrs))
 
     (update! [{db-spec :spec} username attrs]
-      (jdbc/query db-spec (-> (update pg-table)
-                              (sset attrs)
-                              (where := :username username)
-                              (sql/format))))
+      (query db-spec (-> (update pg-table)
+                         (sset attrs)
+                         (where := :username username))))
 
     (get [{db-spec :spec} username]
-      (jdbc/query db-spec (-> (select :*)
-                              (from  pg-table)
-                              (where := :username username)
-                              (sql/format))))
+      (query db-spec (-> (select :*)
+                         (from  pg-table)
+                         (where := :username username))))
 
     (delete! [{db-spec :spec} username]
-      (jdbc/query db-spec (-> (delete-from pg-table)
-                              (where := :username username)
-                              (sql/format))))))
+      (query db-spec (-> (delete-from pg-table)
+                         (where := :username username))))))
 
 (defn database [config]
   (postgres config))
