@@ -14,8 +14,16 @@
 (let [pg-table :profiles]
   (extend-protocol database/Database
     Postgres
-    (create-database! [db]
-      (postgres/create-database! db))
+    (create-database! [{db-spec :spec :as db}]
+      (let [table-create-query (str "CREATE TABLE " pg-table
+                                    " ("
+                                    "id UUID NOT NULL,"
+                                    "username VARCHAR(32) NOT NULL,"
+                                    "hashed-password CHAR(60) NOT NULL"
+                                    ");"
+                                    )])
+      (postgres/create-database! db)
+      (jdbc/query db-spec [table-create-query]))
 
     (drop-database! [db]
       (postgres/drop-database! db))
