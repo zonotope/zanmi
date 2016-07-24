@@ -18,7 +18,7 @@
       (replace #"_" "-")))
 
 (defn- query [db-spec q]
-  (jdbc/query db-spec (sql/format q)))
+  (jdbc/query db-spec (sql/format q) {:identifiers sanitize-identifiers}))
 
 (let [pg-table :profiles]
   (extend-protocol database/Database
