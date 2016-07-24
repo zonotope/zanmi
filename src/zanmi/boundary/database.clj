@@ -2,9 +2,9 @@
 
 (defprotocol Database
   "Interact with a database"
-  (create-database! [db]
+  (initialize! [db]
     "create the database specified by `db`")
-  (drop-database! [db]
+  (destroy! [db]
     "drop the database specified by `db`")
   (create! [db attrs]
     "save the new profile for `username` with `password` in `db`")

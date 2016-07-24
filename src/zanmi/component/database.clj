@@ -13,15 +13,43 @@
       pg-opts {:identifiers (fn [s] (-> s (lower-case) (replace #"_" "-")))
                :entities    (fn [s] (replace s #"-" "_"))}]
 
+  (defn- build-spec [{:keys [username password server-name database-name]
+                      :as db}]
+    (let [subname (str "//" server-name "/" database-name)]
+      {:subprotocol "postgresql"
+       :subname subname
+       :user username
+       :password password}))
+
+  (defn- create-table! [db]
+    (let [db-spec (build-spec db)]
+      (->> (jdbc/create-table-ddl pg-table [[:id :uuid
+                                             :primary :key :not :null]
+
+                                            [:username "varchar(32)"
+                                             :not :null]
+
+                                            [:hashed-password "char(60)"
+                                             :not :null]]
+                                  pg-opts)
+           (jdbc/db-do-commands db-spec))))
+
+  (defn- drop-table! [db]
+    (let [db-spec (build-spec db)]
+      (->> (jdbc/drop-table-ddl pg-table pg-opts)
+           (jdbc/db-do-commands db-spec))))
+
   (defn- query [db-spec q]
     (jdbc/query db-spec (sql/format q) pg-opts))
 
   (extend-protocol database/Database
     Postgres
-    (create-database! [{db-spec :spec :as db}]
-      (postgres/create-database! db))
+    (initialize! [db]
+      (postgres/create-database! db)
+      (create-table! db))
 
-    (drop-database! [{db-spec :spec :as db}]
+    (destroy! [db]
+      (drop-table! db)
       (postgres/drop-database! db))
 
     (create! [{db-spec :spec} attrs]
@@ -40,23 +68,7 @@
 
     (delete! [{db-spec :spec} username]
       (query db-spec (-> (delete-from pg-table)
-                         (where := :username username)))))
-
-  (defn create-table! [{db-spec :spec :as db}]
-    (->> (jdbc/create-table-ddl pg-table [[:id :uuid
-                                           :primary :key :not :null]
-
-                                          [:username "varchar(32)"
-                                           :not :null]
-
-                                          [:hashed-password "char(60)"
-                                           :not :null]]
-                                pg-opts)
-         (jdbc/db-do-commands db-spec)))
-
-  (defn drop-table! [{db-spec :spec :as db}]
-    (->> (jdbc/drop-table-ddl pg-table pg-opts)
-         (jdbc/db-do-commands db-spec))))
+                         (where := :username username))))))
 
 (defn database [config]
   (postgres config))
