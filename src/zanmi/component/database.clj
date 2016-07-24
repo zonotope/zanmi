@@ -9,18 +9,13 @@
             [com.stuartsierra.component :as component])
   (:import [postgres_component.core Postgres]))
 
-(defn- sanitize-sql-entities [s]
-  (replace s #"-" "_"))
+(let [pg-table :profiles
+      pg-opts {:identifiers (fn [s] (-> s (lower-case) (replace #"_" "-")))
+               :entities    (fn [s] (replace s #"-" "_"))}]
 
-(defn- sanitize-identifiers [s]
-  (-> s
-      (lower-case)
-      (replace #"_" "-")))
+  (defn- query [db-spec q]
+    (jdbc/query db-spec (sql/format q) pg-opts))
 
-(defn- query [db-spec q]
-  (jdbc/query db-spec (sql/format q) {:identifiers sanitize-identifiers}))
-
-(let [pg-table :profiles]
   (extend-protocol database/Database
     Postgres
     (create-database! [{db-spec :spec :as db}]
@@ -30,7 +25,8 @@
       (postgres/drop-database! db))
 
     (create! [{db-spec :spec} attrs]
-      (jdbc/insert! db-spec pg-table attrs))
+      (jdbc/insert! db-spec pg-table attrs
+                    :options pg-opts))
 
     (update! [{db-spec :spec} username attrs]
       (query db-spec (-> (update pg-table)
@@ -55,11 +51,11 @@
 
                                           [:hashed-password "char(60)"
                                            :not :null]]
-                                {:entities sanitize-sql-entities})
+                                pg-opts)
          (jdbc/db-do-commands db-spec)))
 
   (defn drop-table! [{db-spec :spec :as db}]
-    (->> (jdbc/drop-table-ddl pg-table {:entities sanitize-sql-entities})
+    (->> (jdbc/drop-table-ddl pg-table pg-opts)
          (jdbc/db-do-commands db-spec))))
 
 (defn database [config]
