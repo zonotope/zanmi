@@ -13,7 +13,7 @@
       pg-opts {:identifiers (fn [s] (-> s (lower-case) (replace #"_" "-")))
                :entities    (fn [s] (replace s #"-" "_"))}]
 
-  (defn- build-spec [{:keys [username password server-name database-name]
+  (defn- build-pg-spec [{:keys [username password server-name database-name]
                       :as db}]
     (let [subname (str "//" server-name "/" database-name)]
       {:subprotocol "postgresql"
@@ -22,12 +22,12 @@
        :password password}))
 
   (defn- create-table! [db]
-    (let [db-spec (build-spec db)]
+    (let [db-spec (build-pg-spec db)]
       (->> (jdbc/create-table-ddl pg-table [[:id :uuid
                                              :primary :key :not :null]
 
                                             [:username "varchar(32)"
-                                             :not :null]
+                                             :not :null :unique]
 
                                             [:hashed-password "char(60)"
                                              :not :null]]
@@ -35,7 +35,7 @@
            (jdbc/db-do-commands db-spec))))
 
   (defn- drop-table! [db]
-    (let [db-spec (build-spec db)]
+    (let [db-spec (build-pg-spec db)]
       (->> (jdbc/drop-table-ddl pg-table pg-opts)
            (jdbc/db-do-commands db-spec))))
 
@@ -56,14 +56,14 @@
       (jdbc/insert! db-spec pg-table attrs
                     :options pg-opts))
 
-    (update! [{db-spec :spec} username attrs]
-      (query db-spec (-> (update pg-table)
-                         (sset attrs)
-                         (where := :username username))))
-
     (get [{db-spec :spec} username]
       (query db-spec (-> (select :*)
                          (from  pg-table)
+                         (where := :username username))))
+
+    (update! [{db-spec :spec} username attrs]
+      (query db-spec (-> (update pg-table)
+                         (sset attrs)
                          (where := :username username))))
 
     (delete! [{db-spec :spec} username]
