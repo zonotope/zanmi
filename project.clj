@@ -10,9 +10,11 @@
                  [buddy/buddy-auth "1.1.0"]
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
+                 [danlentz/clj-uuid "0.1.6"]
 
                  [postgres-component "0.1.0-SNAPSHOT"]
                  [honeysql "0.7.0"]
+                 [org.clojure/java.jdbc "0.6.1"]
 
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
