@@ -14,7 +14,7 @@
                :entities    (fn [s] (replace s #"-" "_"))}]
 
   (defn- build-pg-spec [{:keys [username password server-name database-name]
-                      :as db}]
+                         :as db}]
     (let [subname (str "//" server-name "/" database-name)]
       {:subprotocol "postgresql"
        :subname subname
@@ -29,7 +29,7 @@
                                             [:username "varchar(32)"
                                              :not :null :unique]
 
-                                            [:hashed-password "char(60)"
+                                            [:hashed-password "varchar(128)"
                                              :not :null]]
                                   pg-opts)
            (jdbc/db-do-commands db-spec))))
@@ -53,8 +53,7 @@
       (postgres/drop-database! db))
 
     (create! [{db-spec :spec} attrs]
-      (jdbc/insert! db-spec pg-table attrs
-                    :options pg-opts))
+      (jdbc/insert! db-spec pg-table attrs pg-opts))
 
     (get [{db-spec :spec} username]
       (query db-spec (-> (select :*)
