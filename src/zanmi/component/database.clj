@@ -56,9 +56,9 @@
       (jdbc/insert! db-spec pg-table attrs pg-opts))
 
     (get [{db-spec :spec} username]
-      (query db-spec (-> (select :*)
-                         (from  pg-table)
-                         (where := :username username))))
+      (first (query db-spec (-> (select :*)
+                                (from  pg-table)
+                                (where := :username username)))))
 
     (update! [{db-spec :spec} username attrs]
       (query db-spec (-> (update pg-table)
