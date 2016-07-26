@@ -7,22 +7,22 @@
 
   :dependencies [[org.clojure/clojure "1.9.0-alpha7"]
 
+                 [com.stuartsierra/component "0.3.1"]
+                 [compojure "1.5.0"]
+                 [duct "0.7.0"]
+
                  [buddy/buddy-auth "1.1.0"]
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
                  [danlentz/clj-uuid "0.1.6"]
 
                  [postgres-component "0.1.0-SNAPSHOT"]
+                 [duct/ragtime-component "0.1.4"]
                  [honeysql "0.7.0"]
                  [org.clojure/java.jdbc "0.6.1"]
 
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
-
-                 [com.stuartsierra/component "0.3.1"]
-                 [compojure "1.5.0"]
-                 [duct "0.7.0"]
-                 [duct/ragtime-component "0.1.4"]
                  [ring-jetty-component "0.3.1"]
 
                  [environ "1.0.3"]
