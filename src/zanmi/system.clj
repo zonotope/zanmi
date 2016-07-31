@@ -8,8 +8,7 @@
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-            [zanmi.endpoint.profile :refer [profile-endpoint]]
-            [zanmi.endpoint.token :refer [token-endpoint]]))
+            [zanmi.endpoint.profile :refer [profile-endpoint]]))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
@@ -33,12 +32,10 @@
          :http (jetty-server (:http config))
          :db   (database (:db config))
          :ragtime (ragtime (:ragtime config))
-         :profile (endpoint-component profile-endpoint)
-         :token (endpoint-component (token-endpoint (:secret config))))
+         :profile (endpoint-component (profile-endpoint (:secret config))))
 
         (component/system-using
          {:http [:app]
-          :app  [:profile :token]
+          :app  [:profile]
           :ragtime [:db]
-          :profile [:db]
-          :token [:db]}))))
+          :profile [:db]}))))
