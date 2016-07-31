@@ -8,7 +8,7 @@
       (dissoc :password)
       (assoc :hashed-password (hash/derive password))))
 
-(defn- add-id [{username :username :as attrs}]
+(defn- add-id [{:keys [username] :as attrs}]
   (let [id (uuid/v5 uuid/+namespace-url+ username)]
     (assoc attrs :id id)))
 
@@ -22,11 +22,13 @@
        (database/create! db)))
 
 (defn update! [db username new-password]
-  (let [saved-profile (get db username)]
-    (database/update! db username (hash-password {:password new-password}))))
+  (->> {:password new-password}
+       (hash-password)
+       (database/update! db username)))
 
 (defn delete! [db username]
   (database/delete! db username))
 
-(defn valid? [password {:keys [hashed-password] :as profile}]
-  (hash/check password hashed-password))
+(defn valid? [db username password]
+  (let [{:keys [hashed-password] :as profile} (get db username)]
+    (hash/check password hashed-password)))

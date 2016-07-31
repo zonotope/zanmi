@@ -18,7 +18,6 @@
 
                  [postgres-component "0.1.0-SNAPSHOT"]
                  [duct/ragtime-component "0.1.4"]
-                 [honeysql "0.7.0"]
                  [org.clojure/java.jdbc "0.6.1"]
 
                  [ring "1.4.0"]

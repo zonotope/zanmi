@@ -1,9 +1,6 @@
 (ns zanmi.component.database
   (:require [zanmi.boundary.database :as database]
             [postgres-component.core :as postgres :refer [postgres]]
-            [honeysql.core :as sql]
-            [honeysql.helpers :refer [delete-from from select sset update
-                                      where]]
             [clojure.string :refer [lower-case replace]]
             [clojure.java.jdbc :as jdbc]
             [com.stuartsierra.component :as component])
@@ -39,8 +36,8 @@
       (->> (jdbc/drop-table-ddl pg-table pg-opts)
            (jdbc/db-do-commands db-spec))))
 
-  (defn- query [db-spec q]
-    (jdbc/query db-spec (sql/format q) pg-opts))
+  (defn- by-username [username]
+    ["username = ?" username])
 
   (extend-protocol database/Database
     Postgres
@@ -52,22 +49,17 @@
       (drop-table! db)
       (postgres/drop-database! db))
 
+    (get [{db-spec :spec} username]
+      (jdbc/get-by-id db-spec pg-table username :username pg-opts))
+
     (create! [{db-spec :spec} attrs]
       (jdbc/insert! db-spec pg-table attrs pg-opts))
 
-    (get [{db-spec :spec} username]
-      (first (query db-spec (-> (select :*)
-                                (from  pg-table)
-                                (where := :username username)))))
-
     (update! [{db-spec :spec} username attrs]
-      (query db-spec (-> (update pg-table)
-                         (sset attrs)
-                         (where := :username username))))
+      (jdbc/update! db-spec pg-table attrs (by-username username) pg-opts))
 
     (delete! [{db-spec :spec} username]
-      (query db-spec (-> (delete-from pg-table)
-                         (where := :username username))))))
+      (jdbc/delete! db-spec pg-table (by-username username) pg-opts))))
 
 (defn database [config]
   (postgres config))
