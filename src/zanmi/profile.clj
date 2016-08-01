@@ -31,4 +31,5 @@
 
 (defn valid? [db username password]
   (let [{:keys [hashed-password] :as profile} (get db username)]
-    (hash/check password hashed-password)))
+    (when (hash/check password hashed-password)
+      profile)))
