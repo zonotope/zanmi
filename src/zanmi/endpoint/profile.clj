@@ -1,16 +1,29 @@
 (ns zanmi.endpoint.profile
   (:require [zanmi.profile :refer [get create! delete! update! valid?]]
-            [compojure.core :refer [context DELETE PUT POST]]))
+            [buddy.sign.jwt :as jwt]
+            [compojure.core :refer [context DELETE GET PUT POST]]))
 
-(defn profile-endpoint [{:keys [db] :as endpoint}]
-  (context "/profiles" []
-    (POST "/" [user pass]
-      (create! {:username user, :password pass}))
-    (PUT "/profiles/:user" [user pass new-pass]
-      (let [profile (get user)]
-        (when (valid? pass profile)
-          (update! user new-pass))))
-    (DELETE "profiles/:user" [user pass]
-      (let [profile (get user)]
-        (when (valid? pass profile)
-          (delete! db user))))))
+(defn- sign-profile [profile secret]
+  (-> profile
+      (select-keys [:id :username])
+      (jwt/sign secret)))
+
+(defn profile-endpoint [secret]
+  (fn [{db :db :as endpoint}]
+    (context "/profiles" []
+      (POST "/" [username password]
+        (-> (create! db {:username username, :password password})
+            (sign-profile secret)))
+
+      (GET "/:username" [username password]
+        (when-let [profile (valid? db username password)]
+          (sign-profile profile secret)))
+
+      (PUT "/:username" [username password new-password]
+        (when (valid? db username password)
+          (-> (update! db username new-password)
+              (sign-profile secret))))
+
+      (DELETE "/:username" [username password]
+        (when (valid? db username password)
+          (delete! db username))))))
