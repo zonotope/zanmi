@@ -1,6 +1,9 @@
 (ns zanmi.component.database
   (:require [zanmi.boundary.database :as database]
             [postgres-component.core :as postgres :refer [postgres]]
+            [honeysql.core :as sql]
+            [honeysql.helpers :refer [delete-from from select sset update
+                                      where]]
             [clojure.string :refer [lower-case replace]]
             [clojure.java.jdbc :as jdbc]
             [com.stuartsierra.component :as component])
@@ -8,7 +11,7 @@
 
 (let [pg-table :profiles
       pg-opts {:identifiers (fn [s] (-> s (lower-case) (replace #"_" "-")))
-               :entities    (fn [s] (replace s #"-" "_"))}]
+               :entities (fn [s] (replace s #"-" "_"))}]
 
   (defn- build-pg-spec [{:keys [username password server-name database-name]
                          :as db}]
@@ -39,6 +42,16 @@
   (defn- by-username [username]
     ["username = ?" username])
 
+  (defn- pg-returning-all [sql-stmt]
+    (update-in sql-stmt [0] #(str % " RETURNING *")))
+
+  (defn- pg-update-sql [username attrs]
+    (-> (update pg-table)
+        (sset attrs)
+        (where [:= :username username])
+        (sql/format)
+        (pg-returning-all)))
+
   (extend-protocol database/Database
     Postgres
     (initialize! [db]
@@ -56,7 +69,7 @@
       (jdbc/insert! db-spec pg-table attrs pg-opts))
 
     (update! [{db-spec :spec} username attrs]
-      (jdbc/update! db-spec pg-table attrs (by-username username) pg-opts))
+      (first (jdbc/query db-spec (pg-update-sql username attrs) pg-opts)))
 
     (delete! [{db-spec :spec} username]
       (jdbc/delete! db-spec pg-table (by-username username) pg-opts))))
