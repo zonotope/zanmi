@@ -3,7 +3,6 @@
             [zanmi.component.database :refer [database]]
             [duct.component.endpoint :refer [endpoint-component]]
             [duct.component.handler :refer [handler-component]]
-            [duct.component.ragtime :refer [ragtime]]
             [duct.middleware.not-found :refer [wrap-not-found]]
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
@@ -21,9 +20,7 @@
                                            :nested true}
                                   :responses {:content-types true}})
 
-         :secret "nobody knows this!"}
-
-   :ragtime {:resource-path "zanmi/migrations"}})
+         :secret "nobody knows this!"}})
 
 (defn new-system [config]
   (let [config (meta-merge base-config config)]
@@ -31,11 +28,9 @@
          :app  (handler-component (:app config))
          :http (jetty-server (:http config))
          :db   (database (:db config))
-         :ragtime (ragtime (:ragtime config))
          :profile (endpoint-component (profile-endpoint (:secret config))))
 
         (component/system-using
          {:http [:app]
           :app  [:profile]
-          :ragtime [:db]
           :profile [:db]}))))
