@@ -25,10 +25,9 @@
   (fn [{db :db :as endpoint}]
     (context "/profiles" []
       (POST "/" [username password]
-        (if-let [token (-> (create! db {:username username, :password password})
-                           (profile->token secret))]
+        (if-let [profile (create! db {:username username, :password password})]
           (created (resource-url username)
-                   token)
+                   (profile->token profile secret))
           (-> (response {:message "username is already taken"})
               (assoc :status 409))))
 
