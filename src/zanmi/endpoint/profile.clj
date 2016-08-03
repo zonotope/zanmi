@@ -23,28 +23,39 @@
   (-> (response/created url token)
       (content-type "text/json")))
 
+(def ^:private unauthorized
+  (-> (response {:message "bad username or password"})
+      (assoc :status 401)))
+
+(def ^:private conflict
+  (-> (response {:message "username is already taken"})
+      (assoc :status 409)))
+
 (defn profile-endpoint [secret]
   (fn [{db :db :as endpoint}]
     (context "/profiles" []
       (POST "/" [username password]
-        (let [token (-> (create! db {:username username, :password password})
-                        (profile->token secret))
-              url (resource-url username)]
-          (created url token)))
+        (if-let [token (-> (create! db {:username username, :password password})
+                           (profile->token secret))]
+          (created (resource-url username) token)
+          conflict))
 
       (GET "/:username" [username password]
-        (when-let [profile (valid? db username password)]
+        (if-let [profile (valid? db username password)]
           (-> profile
               (profile->token secret)
-              (ok))))
+              (ok))
+          unauthorized))
 
       (PUT "/:username" [username password new-password]
-        (when (valid? db username password)
+        (if (valid? db username password)
           (-> (update! db username new-password)
               (profile->token secret)
-              (ok))))
+              (ok))
+          unauthorized))
 
       (DELETE "/:username" [username password]
-        (when (valid? db username password)
+        (if (valid? db username password)
           (-> (delete! db username)
-              (ok)))))))
+              (ok))
+          unauthorized)))))
