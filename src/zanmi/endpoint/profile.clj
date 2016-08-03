@@ -1,5 +1,5 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.profile :refer [get create! delete! update! valid?]]
+  (:require [zanmi.data.profile :refer [get create! delete! update! valid?]]
             [buddy.sign.jwt :as jwt]
             [compojure.core :refer [context DELETE GET PUT POST]]
             [ring.util.response :as response :refer [created response]]))

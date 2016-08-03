@@ -1,4 +1,4 @@
-(ns zanmi.profile
+(ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]))
