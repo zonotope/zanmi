@@ -7,18 +7,26 @@
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
+            [ring.middleware.format :refer [wrap-restful-format]]
             [zanmi.endpoint.profile :refer [profile-endpoint]]))
+
+(defn- wrap-format [handler formats]
+  (wrap-restful-format handler :formats formats))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
+                      [wrap-format :formats]
                       [wrap-defaults :defaults]]
 
          :not-found  "Resource Not Found"
 
+         :formats [:json :transit-json]
+
          :defaults   (meta-merge api-defaults
                                  {:params {:keywordize true
                                            :nested true}
-                                  :responses {:content-types true}})
+                                  :responses {:absolute-redirects true
+                                              :not-modified-responses true}})
 
          :secret "nobody knows this!"}})
 
