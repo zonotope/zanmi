@@ -47,4 +47,4 @@
       (DELETE "/:username" [username password]
         (when-authorized db username password
                          (fn [_] (-> (delete! db username)
-                                    (response))))))))
+                                    (response {:message "deleted"}))))))))
