@@ -2,8 +2,7 @@
   (:require [zanmi.profile :refer [get create! delete! update! valid?]]
             [buddy.sign.jwt :as jwt]
             [compojure.core :refer [context DELETE GET PUT POST]]
-            [ring.util.response :as response :refer [created content-type
-                                                     response]]))
+            [ring.util.response :as response :refer [created response]]))
 
 (defn- resource-url [username]
   (str "/profiles/" username))
@@ -16,13 +15,11 @@
 (defn- profile->token [profile secret]
   {:token (sign-profile profile secret)})
 
-(def ^:private unauthorized
-  (-> (response {:message "bad username or password"})
-      (assoc :status 401)))
-
-(def ^:private conflict
-  (-> (response {:message "username is already taken"})
-      (assoc :status 409)))
+(defn- when-authorized [db username password response-fn]
+  (if-let [profile (valid? db username password)]
+    (response-fn profile)
+    (-> (response {:message "bad username or password"})
+        (assoc :status 401))))
 
 (defn profile-endpoint [secret]
   (fn [{db :db :as endpoint}]
@@ -30,29 +27,24 @@
       (POST "/" [username password]
         (if-let [token (-> (create! db {:username username, :password password})
                            (profile->token secret))]
-          (created (resource-url username) token)
-
-          conflict))
+          (created (resource-url username)
+                   token)
+          (-> (response {:message "username is already taken"})
+              (assoc :status 409))))
 
       (GET "/:username" [username password]
-        (if-let [profile (valid? db username password)]
-          (-> profile
-              (profile->token secret)
-              (response))
-
-          unauthorized))
+        (when-authorized db username password
+                         (fn [profile] (-> profile
+                                          (profile->token secret)
+                                          (response)))))
 
       (PUT "/:username" [username password new-password]
-        (if (valid? db username password)
-          (-> (update! db username new-password)
-              (profile->token secret)
-              (response))
-
-          unauthorized))
+        (when-authorized db username password
+                         (fn [_] (-> (update! db username new-password)
+                                    (profile->token secret)
+                                    (response)))))
 
       (DELETE "/:username" [username password]
-        (if (valid? db username password)
-          (-> (delete! db username)
-              (response))
-
-          unauthorized)))))
+        (when-authorized db username password
+                         (fn [_] (-> (delete! db username)
+                                    (response))))))))
