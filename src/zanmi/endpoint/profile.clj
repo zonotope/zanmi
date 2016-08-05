@@ -4,7 +4,7 @@
             [compojure.core :refer [context DELETE GET PUT POST]]
             [ring.util.response :refer [created response]]))
 
-(defn- resource-url [username]
+(defn- resource-url [{username :username :as profile}]
   (str "/profiles/" username))
 
 (defn- ok [profile secret]
@@ -21,7 +21,7 @@
     (context "/profiles" []
       (POST "/" [username password]
         (if-let [profile (create! db {:username username, :password password})]
-          (created (resource-url username)
+          (created (resource-url profile)
                    (render-token profile secret))
           (-> (response (render-message "username is already taken"))
               (assoc :status 409))))
