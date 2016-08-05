@@ -10,7 +10,7 @@
 (defn- ok [profile secret]
   (response (render-token profile secret)))
 
-(defn- when-authorized [db username password response-fn]
+(defn- when-authenticated [db username password response-fn]
   (if-let [profile (valid? db username password)]
     (response-fn profile)
     (-> (response (render-message "bad username or password"))
@@ -27,17 +27,17 @@
               (assoc :status 409))))
 
       (GET "/:username" [username password]
-        (when-authorized db username password
+        (when-authenticated db username password
                          (fn [profile] (ok profile secret))))
 
       (PUT "/:username" [username password new-password]
-        (when-authorized db username password
+        (when-authenticated db username password
                          (fn [_]
                            (let [new-profile (update! db username new-password)]
                              (ok new-profile secret)))))
 
       (DELETE "/:username" [username password]
-        (when-authorized db username password
+        (when-authenticated db username password
                          (fn [_] (when (delete! db username)
                                   (-> (render-message (str username " deleted"))
                                       (response)))))))))
