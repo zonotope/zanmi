@@ -5,7 +5,7 @@
 
   :min-lein-version "2.0.0"
 
-  :dependencies [[org.clojure/clojure "1.9.0-alpha7"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha10"]
 
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.0"]
