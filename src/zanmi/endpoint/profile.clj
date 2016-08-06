@@ -4,8 +4,10 @@
             [compojure.core :refer [context DELETE GET PUT POST]]
             [ring.util.response :refer [created response]]))
 
-(defn- resource-url [{username :username :as profile}]
-  (str "/profiles/" username))
+(def ^:private route-prefix "/profiles")
+
+(defn resource-url [{username :username :as profile}]
+  (str route-prefix "/" username))
 
 (defn- ok [profile secret]
   (response (render-token profile secret)))
@@ -18,7 +20,7 @@
 
 (defn profile-endpoint [secret]
   (fn [{db :db :as endpoint}]
-    (context "/profiles" []
+    (context route-prefix []
       (POST "/" [username password]
         (if-let [profile (create! db {:username username, :password password})]
           (created (resource-url profile)
