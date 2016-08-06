@@ -4,7 +4,10 @@
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]))
 
-(spec/def ::username string?)
+(defn- username-length? [username]
+  (<= (count username) 32))
+
+(spec/def ::username (spec/and string? username-length?))
 (spec/def ::password string?)
 (spec/def ::profile (spec/keys :req-un [::username ::password]))
 
