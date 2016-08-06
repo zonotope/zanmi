@@ -4,6 +4,10 @@
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]))
 
+(spec/def ::username string?)
+(spec/def ::password string?)
+(spec/def ::profile (spec/keys :req-un [::username ::password]))
+
 (defn- hash-password [{:keys [password] :as attrs}]
   (-> attrs
       (dissoc :password)
@@ -17,15 +21,17 @@
   (database/fetch db username))
 
 (defn create! [db {:keys [username password] :as attrs}]
-  (->> attrs
-       (add-id)
-       (hash-password)
-       (database/create! db)))
+  (when (spec/valid? ::profile attrs)
+    (->> attrs
+         (add-id)
+         (hash-password)
+         (database/create! db))))
 
 (defn update! [db username new-password]
-  (->> {:password new-password}
-       (hash-password)
-       (database/update! db username)))
+  (when (spec/valid? ::password new-password)
+    (->> {:password new-password}
+         (hash-password)
+         (database/update! db username))))
 
 (defn delete! [db username]
   (database/delete! db username))
