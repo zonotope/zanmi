@@ -1,5 +1,6 @@
 (ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
+            [clojure.spec :as spec]
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]))
 
@@ -29,7 +30,7 @@
 (defn delete! [db username]
   (database/delete! db username))
 
-(defn valid? [db username password]
+(defn authenticate [db username password]
   (let [{:keys [hashed-password] :as profile} (fetch db username)]
     (when (hash/check password hashed-password)
       profile)))

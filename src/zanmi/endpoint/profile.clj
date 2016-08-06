@@ -1,5 +1,5 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.data.profile :refer [create! delete! update! valid?]]
+  (:require [zanmi.data.profile :refer [authenticate create! delete! update!]]
             [zanmi.view.profile :refer [render-message render-token]]
             [compojure.core :refer [context DELETE GET PUT POST]]
             [ring.util.response :refer [created response]]))
@@ -13,7 +13,7 @@
   (response (render-token profile secret)))
 
 (defn- when-authenticated [db username password response-fn]
-  (if-let [profile (valid? db username password)]
+  (if-let [profile (authenticate db username password)]
     (response-fn profile)
     (-> (response (render-message "bad username or password"))
         (assoc :status 401))))
