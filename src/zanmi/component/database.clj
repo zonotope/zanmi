@@ -62,7 +62,7 @@
       (drop-table! db)
       (postgres/drop-database! db))
 
-    (get [{db-spec :spec} username]
+    (fetch [{db-spec :spec} username]
       (jdbc/get-by-id db-spec pg-table username :username pg-opts))
 
     (create! [{db-spec :spec} attrs]

@@ -1,5 +1,5 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.data.profile :refer [get create! delete! update! valid?]]
+  (:require [zanmi.data.profile :refer [create! delete! update! valid?]]
             [zanmi.view.profile :refer [render-message render-token]]
             [compojure.core :refer [context DELETE GET PUT POST]]
             [ring.util.response :refer [created response]]))
@@ -28,16 +28,17 @@
 
       (GET "/:username" [username password]
         (when-authenticated db username password
-                         (fn [profile] (ok profile secret))))
+                            (fn [profile] (ok profile secret))))
 
       (PUT "/:username" [username password new-password]
         (when-authenticated db username password
-                         (fn [_]
-                           (let [new-profile (update! db username new-password)]
-                             (ok new-profile secret)))))
+                            (fn [_] (let [new-profile (update! db username
+                                                              new-password)]
+                                     (ok new-profile secret)))))
 
       (DELETE "/:username" [username password]
         (when-authenticated db username password
-                         (fn [_] (when (delete! db username)
-                                  (-> (render-message (str username " deleted"))
-                                      (response)))))))))
+                            (fn [_] (when (delete! db username)
+                                     (-> (render-message (str username
+                                                              " deleted"))
+                                         (response)))))))))

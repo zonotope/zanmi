@@ -12,8 +12,8 @@
   (let [id (uuid/v5 uuid/+namespace-url+ username)]
     (assoc attrs :id id)))
 
-(defn get [db username]
-  (database/get db username))
+(defn fetch [db username]
+  (database/fetch db username))
 
 (defn create! [db {:keys [username password] :as attrs}]
   (->> attrs
@@ -30,6 +30,6 @@
   (database/delete! db username))
 
 (defn valid? [db username password]
-  (let [{:keys [hashed-password] :as profile} (get db username)]
+  (let [{:keys [hashed-password] :as profile} (fetch db username)]
     (when (hash/check password hashed-password)
       profile)))

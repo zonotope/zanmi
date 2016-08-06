@@ -11,7 +11,6 @@
                  [compojure "1.5.0"]
                  [duct "0.7.0"]
 
-                 [buddy/buddy-auth "1.1.0"]
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
                  [danlentz/clj-uuid "0.1.6"]
