@@ -14,6 +14,7 @@
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
                  [danlentz/clj-uuid "0.1.6"]
+                 [com.nulab-inc/zxcvbn "1.1.4"]
 
                  [postgres-component "0.1.0-SNAPSHOT"]
                  [honeysql "0.7.0"]
