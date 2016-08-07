@@ -5,11 +5,14 @@
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]))
 
-(defn- username-length? [username]
+(defn- short-username? [username]
   (<= (count username) 32))
 
-(spec/def ::username (spec/and string? username-length?))
-(spec/def ::password string?)
+(defn- strong-password? [password]
+  (>= (zxcvbn password) 3))
+
+(spec/def ::username (spec/and string? short-username?))
+(spec/def ::password (spec/and string? strong-password?))
 (spec/def ::profile (spec/keys :req-un [::username ::password]))
 
 (defn- hash-password [{:keys [password] :as attrs}]
