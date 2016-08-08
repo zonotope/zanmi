@@ -14,8 +14,8 @@
   (wrap-restful-format handler :formats formats))
 
 (def base-config
-  {:app {:middleware [[wrap-not-found :not-found]
-                      [wrap-format :formats]
+  {:app {:middleware [[wrap-format :formats]
+                      [wrap-not-found :not-found]
                       [wrap-defaults :defaults]]
 
          :not-found  "Resource Not Found"

@@ -1,7 +1,7 @@
 (ns zanmi.endpoint.profile
   (:require [zanmi.data.profile :refer [authenticate create! delete! update!]]
             [zanmi.view.profile :refer [auth-error create-error deleted-message
-                                        render-message render-token]]
+                                        render-token]]
             [compojure.core :refer [context DELETE GET PUT POST]]
             [ring.util.response :refer [created response]]))
 
