@@ -16,41 +16,44 @@
 
 (def ^:private table :profiles)
 
-(defn- make-spec [postgres]
+(defn- make-pooled-spec [postgres]
   {:datasource (make-datasource postgres)})
 
-(defn- pg-spec [{:keys [username password server-name database-name] :as db}]
+(defn- make-connection-spec [{:keys [username password server-name
+                                     database-name]
+                              :as db}]
   (let [subname (str "//" server-name "/" database-name)]
     {:subprotocol "postgresql"
      :subname subname
      :user username
      :password password}))
 
+(defn- postgres-db-spec [db]
+  (make-connection-spec (assoc db :database-name "postgres")))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ddl                                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- create-database! [{:keys [database-name] :as db}]
-  (jdbc/execute (pg-spec db) (str "CREATE DATABASE " database-name)))
+  (with-open [conn (jdbc/connection (postgres-db-spec db))]
+    (jdbc/execute conn (str "CREATE DATABASE " database-name))))
 
 (defn- drop-database! [{:keys [database-name] :as db}]
-  (jdbc/execute (pg-spec db) (str "DROP DATABASE " database-name)))
+  (with-open [conn (jdbc/connection (postgres-db-spec db))]
+    (jdbc/execute conn (str "DROP DATABASE " database-name))))
 
 (defn- create-table! [db]
-  (let [db-spec (make-spec db)]
-    (jdbc/execute db-spec (str "CREATE TABLE " (name table) " ("
-                               "  id UUID PRIMARY KEY NOT NULL,"
-                               "  username VARCHAR(32) NOT NULL UNIQUE,"
-                               "  hashed_password VARCHAR(128) NOT NULL,"
-                               "  created TIMESTAMP WITHOUT TIME ZONE"
-                               "          DEFAULT (now() at time zone 'utc'),"
-                               "  modified TIMESTAMP WITHOUT TIME ZONE"
-                               "           DEFAULT (now() at time zone 'utc')"
-                               ")"))))
-
-(defn- drop-table! [db]
-  (let [db-spec (make-spec db)]
-    (jdbc/execute db-spec (str "DROP TABLE " (name table)))))
+  (with-open [conn (jdbc/connection (make-connection-spec db))]
+    (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
+                            "  id UUID PRIMARY KEY NOT NULL,"
+                            "  username VARCHAR(32) NOT NULL UNIQUE,"
+                            "  hashed_password VARCHAR(128) NOT NULL,"
+                            "  created TIMESTAMP WITHOUT TIME ZONE"
+                            "          DEFAULT (now() at time zone 'utc'),"
+                            "  modified TIMESTAMP WITHOUT TIME ZONE"
+                            "           DEFAULT (now() at time zone 'utc')"
+                            ")"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; querying                                                                 ;;
@@ -83,7 +86,7 @@
     (if (:spec postgres)
       postgres
       (assoc postgres
-             :spec (make-spec postgres))))
+             :spec (make-pooled-spec postgres))))
 
   (stop [postgres]
     (if-let [datasource (-> postgres :spec :datasource)]
@@ -97,7 +100,6 @@
     (create-table! db))
 
   (destroy! [db]
-    (drop-table! db)
     (drop-database! db))
 
   (fetch [{db-spec :spec} username]
