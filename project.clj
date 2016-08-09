@@ -17,8 +17,8 @@
                  [com.nulab-inc/zxcvbn "1.1.4"]
 
                  [postgres-component "0.1.0-SNAPSHOT"]
-                 [honeysql "0.7.0"]
-                 [org.clojure/java.jdbc "0.6.1"]
+                 [honeysql "0.8.0"]
+                 [funcool/clojure.jdbc "0.9.0"]
 
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
