@@ -39,10 +39,6 @@
   (with-open [conn (jdbc/connection (postgres-db-spec db))]
     (jdbc/execute conn (str "CREATE DATABASE " database-name))))
 
-(defn- drop-database! [{:keys [database-name] :as db}]
-  (with-open [conn (jdbc/connection (postgres-db-spec db))]
-    (jdbc/execute conn (str "DROP DATABASE " database-name))))
-
 (defn- create-table! [db]
   (with-open [conn (jdbc/connection (make-connection-spec db))]
     (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
@@ -54,6 +50,25 @@
                             "  modified TIMESTAMP WITHOUT TIME ZONE"
                             "           DEFAULT (now() at time zone 'utc')"
                             ")"))))
+
+(defn- set-update-modified-trigger! [db]
+  (with-open [conn (jdbc/connection (make-connection-spec db))]
+    (jdbc/execute conn (str "CREATE OR REPLACE FUNCTION update_modified() "
+                            "RETURNS TRIGGER AS $$ "
+                            "BEGIN "
+                            "  NEW.modified = (now() at time zone 'utc'); "
+                            "  RETURN NEW; "
+                            "END; "
+                            "$$ language 'plpgsql';"))
+
+    (jdbc/execute conn (str "CREATE TRIGGER update_" (name table) "_modified "
+                            "BEFORE UPDATE ON " (name table) " "
+                            "FOR EACH ROW EXECUTE PROCEDURE "
+                            "  update_modified();"))))
+
+(defn- drop-database! [{:keys [database-name] :as db}]
+  (with-open [conn (jdbc/connection (postgres-db-spec db))]
+    (jdbc/execute conn (str "DROP DATABASE " database-name))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; querying                                                                 ;;
@@ -97,7 +112,8 @@
   database/Database
   (initialize! [db]
     (create-database! db)
-    (create-table! db))
+    (create-table! db)
+    (set-update-modified-trigger! db))
 
   (destroy! [db]
     (drop-database! db))
