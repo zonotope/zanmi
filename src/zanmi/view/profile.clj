@@ -3,7 +3,7 @@
 
 (defn- sign [profile secret]
   (-> profile
-      (select-keys [:id :username])
+      (select-keys [:id :username :modified])
       (jwt/sign secret)))
 
 (defn render-message [message]
