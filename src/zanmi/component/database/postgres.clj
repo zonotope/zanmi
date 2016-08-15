@@ -14,8 +14,6 @@
 ;; db connection specs                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def ^:private table :profiles)
-
 (defn- make-pooled-spec [postgres]
   {:datasource (make-datasource postgres)})
 
@@ -35,6 +33,8 @@
 ;; ddl                                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def ^:private table :profiles)
+
 (defn- create-database! [{:keys [database-name] :as db}]
   (with-open [conn (jdbc/connection (postgres-db-spec db))]
     (jdbc/execute conn (str "CREATE DATABASE " database-name))))
@@ -51,7 +51,7 @@
                             "           DEFAULT (now() at time zone 'utc')"
                             ")"))))
 
-(defn- set-update-modified-trigger! [db]
+(defn- set-modified-trigger! [db]
   (with-open [conn (jdbc/connection (make-connection-spec db))]
     (jdbc/execute conn (str "CREATE OR REPLACE FUNCTION update_modified() "
                             "RETURNS TRIGGER AS $$ "
@@ -113,7 +113,7 @@
   (initialize! [db]
     (create-database! db)
     (create-table! db)
-    (set-update-modified-trigger! db))
+    (set-modified-trigger! db))
 
   (destroy! [db]
     (drop-database! db))

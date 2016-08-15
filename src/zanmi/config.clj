@@ -3,7 +3,9 @@
 
 (def defaults
   {:http {:port 3000}
-   :db {:username "zanmi"}})
+   :db {:username "zanmi"}
+   :password-strength 3
+   :username-length 32})
 
 (def environ
   {:http {:port (some-> env :port Integer.)}
