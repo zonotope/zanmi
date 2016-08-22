@@ -34,7 +34,7 @@
       (dissoc :password)
       (assoc :hashed-password (hash/derive password))))
 
-(defn- add-id [{:keys [username] :as attrs}]
+(defn- with-id [{:keys [username] :as attrs}]
   (let [id (uuid/v5 uuid/+namespace-url+ username)]
     (assoc attrs :id id)))
 
@@ -48,7 +48,7 @@
 (defn create! [db {:keys [username password] :as attrs}]
   (when-valid ::profile attrs
               (fn [attrs] (->> attrs
-                              (add-id)
+                              (with-id)
                               (hash-password)
                               (database/create! db)))))
 

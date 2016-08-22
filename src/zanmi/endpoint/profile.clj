@@ -36,14 +36,14 @@
 
       (PUT "/:username" [username password new-password]
         (when-authenticated db username password
-                            (fn [_] (let [result (update! db username
-                                                         new-password)]
-                                     (if-let [new-profile (:ok result)]
-                                       (ok new-profile secret)
-                                       (-> (:error result)
-                                           (render-error)
-                                           (response)
-                                           (assoc :status 400)))))))
+                            (fn [_]
+                              (let [result (update! db username new-password)]
+                                (if-let [new-profile (:ok result)]
+                                  (ok new-profile secret)
+                                  (-> (:error result)
+                                      (render-error)
+                                      (response)
+                                      (assoc :status 400)))))))
 
       (DELETE "/:username" [username password]
         (when-authenticated db username password
