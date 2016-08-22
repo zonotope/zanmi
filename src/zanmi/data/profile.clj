@@ -27,7 +27,7 @@
 (defn- when-valid [spec data valid-fn]
   (if (spec/valid? spec data)
     {:ok (valid-fn data)}
-    {:errors (spec/explain-data spec data)}))
+    {:error (spec/explain-data spec data)}))
 
 (defn- hash-password [{:keys [password] :as attrs}]
   (-> attrs
@@ -54,7 +54,7 @@
 
 (defn update! [db username new-password]
   (when-valid ::password new-password
-              (fn [password] (->> {:password new-password}
+              (fn [password] (->> {:password password}
                                  (hash-password)
                                  (database/update! db username)))))
 
