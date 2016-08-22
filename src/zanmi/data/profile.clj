@@ -1,10 +1,9 @@
 (ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
-            [zxcvbn.core :as zxcvbn]
-            [zanmi.util :refer [zxcvbn]]
             [clojure.spec :as spec]
             [buddy.hashers :as hash]
-            [clj-uuid :as uuid]))
+            [clj-uuid :as uuid]
+            [zxcvbn.core :as zxcvbn]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; validation                                                               ;;
