@@ -1,5 +1,6 @@
 (ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
+            [zxcvbn.core :as zxcvbn]
             [zanmi.util :refer [zxcvbn]]
             [clojure.spec :as spec]
             [buddy.hashers :as hash]
@@ -13,7 +14,8 @@
   (<= (count username) 32))
 
 (defn- strong-password? [password]
-  (>= (zxcvbn password) 3))
+  (>= (:score (zxcvbn/check password))
+      3))
 
 (spec/def ::username (spec/and string? short-username?))
 (spec/def ::password (spec/and string? strong-password?))

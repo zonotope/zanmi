@@ -5,7 +5,7 @@
 
   :min-lein-version "2.0.0"
 
-  :dependencies [[org.clojure/clojure "1.9.0-alpha10"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha11"]
 
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.0"]
@@ -14,7 +14,7 @@
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
                  [danlentz/clj-uuid "0.1.6"]
-                 [com.nulab-inc/zxcvbn "1.1.4"]
+                 [zxcvbn-clj "0.1.0-SNAPSHOT"]
 
                  [postgres-component "0.1.0-SNAPSHOT"]
                  [honeysql "0.8.0"]
