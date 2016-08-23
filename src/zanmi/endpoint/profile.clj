@@ -53,7 +53,7 @@
         (let [result (create! db {:username username, :password password})]
           (if-let [profile (:ok result)]
             (created profile secret)
-            (error (:error result)))))
+            (error (:error result) 409))))
 
       (GET "/:username" [username password]
         (when-authenticated db username password
@@ -65,7 +65,7 @@
                               (let [result (update! db username new-password)]
                                 (if-let [new-profile (:ok result)]
                                   (ok new-profile secret)
-                                  (error (:error result)))))))
+                                  (error (:error result) 400))))))
 
       (DELETE "/:username" [username password]
         (when-authenticated db username password
