@@ -7,7 +7,9 @@
                                                      sset update values where]]
             [jdbc.core :as jdbc]
             [hikari-cp.core :refer [make-datasource close-datasource]]
-            [clojure.string :refer [join lower-case replace]]
+            [camel-snake-kebab.core :refer [->kebab-case-keyword]]
+            [clojure.string :refer [join]]
+            [clojure.set :refer [rename-keys]]
             [com.stuartsierra.component :as component]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,11 +82,17 @@
 (defhelper returning [m args]
   (assoc m :returning args))
 
+(defn- sanitize-keys [m]
+  (let [keymap (into {} (map (fn [k] {k (->kebab-case-keyword k)})
+                             (keys m)))]
+    (rename-keys m keymap)))
+
 (defn- query-one [db-spec statement]
   (->> statement
        (sql/format)
        (jdbc/fetch db-spec)
-       (first)))
+       (first)
+       (sanitize-keys)))
 
 (defn- execute [db-spec statement]
   (->> statement
