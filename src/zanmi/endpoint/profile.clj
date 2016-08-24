@@ -1,6 +1,6 @@
 (ns zanmi.endpoint.profile
   (:require [zanmi.data.profile :refer [authenticate create! delete! update!]]
-            [zanmi.view.profile :refer [auth-error deleted-message render-error
+            [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
             [compojure.core :refer [context DELETE GET PUT POST]]
             [ring.util.response :as response :refer [response]]))
@@ -11,7 +11,7 @@
 
 (def ^:private route-prefix "/profiles")
 
-(defn resource-url [{username :username :as profile}]
+(defn- resource-url [{username :username :as profile}]
   (str route-prefix "/" username))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -26,7 +26,8 @@
                     (render-token profile secret)))
 
 (defn- deleted [username]
-  (response (deleted-message username)))
+  (let [deleted-message (str username " deleted")]
+    (response (render-message (deleted-message username)))))
 
 (defn- error [e status]
   (-> (response (render-error e))
@@ -39,8 +40,7 @@
 (defn- when-authenticated [db username password response-fn]
   (if-let [profile (authenticate db username password)]
     (response-fn profile)
-    (-> (response auth-error)
-        (assoc :status 401))))
+    (error "bad username or password" 401)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; endpoint                                                                 ;;
