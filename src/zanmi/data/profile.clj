@@ -1,6 +1,8 @@
 (ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
+            [zanmi.util.validation :refer [defvalidator explain-validators]]
             [clojure.spec :as spec]
+            [clojure.string :as string]
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]
             [zxcvbn.core :as zxcvbn]))
@@ -9,12 +11,18 @@
 ;; validation                                                               ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- short-username? [username]
-  (<= (count username) 32))
+(defvalidator string? [field]
+  (clojure.core/string? field)
+  "Must be a string.")
 
-(defn- strong-password? [password]
+(defvalidator short-username? [username]
+  (<= (count username) 32)
+  "The username can't be longer than 32 characters.")
+
+(defvalidator strong-password? [password]
   (>= (:score (zxcvbn/check password))
-      3))
+      3)
+  "The password isn't strong enough.")
 
 (spec/def ::username (spec/and string? short-username?))
 (spec/def ::password (spec/and string? strong-password?))
@@ -24,10 +32,10 @@
 ;; utilities                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-valid [spec data valid-fn]
+(defn- when-valid [spec data validated-fn]
   (if (spec/valid? spec data)
-    {:ok (valid-fn data)}
-    {:error (spec/explain-data spec data)}))
+    {:ok (validated-fn data)}
+    {:error (explain-validators spec data)}))
 
 (defn- hash-password [{:keys [password] :as attrs}]
   (-> attrs
