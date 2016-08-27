@@ -20,8 +20,7 @@
   "The username can't be longer than 32 characters.")
 
 (defvalidator strong-password? [password]
-  (>= (:score (zxcvbn/check password))
-      3)
+  (>= (:score (zxcvbn/check password)) 3)
   "The password isn't strong enough.")
 
 (spec/def ::username (spec/and string? short-username?))
@@ -33,9 +32,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- when-valid [spec data validated-fn]
-  (if (spec/valid? spec data)
-    {:ok (validated-fn data)}
-    {:error (explain-validators spec data)}))
+  (if-let [errors (explain-validators spec data)]
+    {:error errors}
+    {:ok (validated-fn data)}))
 
 (defn- hash-password [{:keys [password] :as attrs}]
   (-> attrs
