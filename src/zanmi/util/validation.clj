@@ -1,17 +1,21 @@
 (ns zanmi.util.validation
   (:require [clojure.spec :as spec]))
 
-(let [error-message-registry (atom {})]
-  (defn- register-error-message! [sym message]
-    (swap! error-message-registry #(assoc % sym message)))
+(let [error-fn-registry (atom {})]
+  (defn register-error-fn! [sym message]
+    (swap! error-fn-registry #(assoc % sym message)))
 
-  (defn- error-message [sym]
-    (sym @error-message-registry)))
+  (defn- error-fn [sym]
+    (sym @error-fn-registry)))
 
-(defmacro defvalidator [sym binding validation message]
-  (register-error-message! sym message)
-  `(defn ~sym ~binding ~validation))
+(defn- error-message [sym data]
+  ((error-fn sym) data))
+
+(defmacro defvalidator [sym binding validation message-body]
+  `(let [message-fn# (fn ~binding ~message-body)]
+     (register-error-fn! (quote ~sym) message-fn#)
+     (defn ~sym ~binding ~validation)))
 
 (defn explain-validators [spec data]
   (if-let [problems (::spec/problems (spec/explain-data spec data))]
-    (map #(error-message (:pred %)) problems)))
+    (map #(error-message (:pred %) (:val %)) problems)))
