@@ -26,7 +26,7 @@
                  [ring-jetty-component "0.3.1"]
 
                  [camel-snake-kebab "0.4.0"]
-                 [environ "1.0.3"]
+                 [environ "1.1.0"]
                  [meta-merge "0.1.1"]]
 
   :plugins [[lein-environ "1.0.3"]]
