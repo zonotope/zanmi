@@ -11,7 +11,7 @@
 (defn- error-message [sym data]
   ((error-fn sym) data))
 
-(defmacro defvalidator [sym binding validation message-body]
+(defmacro defvalidator [sym binding validation error-key message-body]
   `(let [message-fn# (fn ~binding ~message-body)]
      (register-error-fn! (quote ~sym) message-fn#)
      (defn ~sym ~binding ~validation)))

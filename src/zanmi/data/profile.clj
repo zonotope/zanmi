@@ -13,14 +13,16 @@
 
 (defvalidator string? [field]
   (clojure.core/string? field)
-  "Must be a string.")
+  :on-error "Must be a string.")
 
 (defvalidator short-username? [username]
   (<= (count username) 32)
-  "The username can't be longer than 32 characters.")
+  :on-error "The username can't be longer than 32 characters.")
 
 (defvalidator strong-password? [password]
   (>= (:score (zxcvbn/check password)) 3)
+
+  :on-error
   (let [{{:keys [suggestions warning]} :feedback} (zxcvbn/check password)]
     (str "The password isn't strong enough. "
          warning " "
