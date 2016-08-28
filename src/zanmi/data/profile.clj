@@ -21,7 +21,10 @@
 
 (defvalidator strong-password? [password]
   (>= (:score (zxcvbn/check password)) 3)
-  "The password isn't strong enough.")
+  (let [{{:keys [suggestions warning]} :feedback} (zxcvbn/check password)]
+    (str "The password isn't strong enough. "
+         warning " "
+         (string/join " " suggestions))))
 
 (spec/def ::username (spec/and string? short-username?))
 (spec/def ::password (spec/and string? strong-password?))
