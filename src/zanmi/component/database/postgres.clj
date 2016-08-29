@@ -1,5 +1,6 @@
 (ns zanmi.component.database.postgres
   (:require [zanmi.boundary.database :as database]
+            [zanmi.config :as config]
             [honeysql.core :as sql]
             [honeysql.format :as fmt]
             [honeysql.helpers :as sql-helper :refer [defhelper delete-from
@@ -43,9 +44,10 @@
 
 (defn- create-table! [db]
   (with-open [conn (jdbc/connection (make-connection-spec db))]
+    (let [length config/username-length])
     (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
                             "  id UUID PRIMARY KEY NOT NULL,"
-                            "  username VARCHAR(32) NOT NULL UNIQUE,"
+                            "  username VARCHAR(" length ") NOT NULL UNIQUE,"
                             "  hashed_password VARCHAR(128) NOT NULL,"
                             "  created TIMESTAMP WITHOUT TIME ZONE"
                             "          DEFAULT (now() at time zone 'utc'),"

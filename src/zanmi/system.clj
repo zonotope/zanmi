@@ -1,14 +1,14 @@
 (ns zanmi.system
   (:require [com.stuartsierra.component :as component]
             [zanmi.component.database :refer [database]]
+            [zanmi.endpoint.profile :refer [profile-endpoint]]
             [duct.component.endpoint :refer [endpoint-component]]
             [duct.component.handler :refer [handler-component]]
             [duct.middleware.not-found :refer [wrap-not-found]]
-            [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.format :refer [wrap-restful-format]]
-            [zanmi.endpoint.profile :refer [profile-endpoint]]))
+            [meta-merge.core :refer [meta-merge]]))
 
 (defn- wrap-format [handler formats]
   (wrap-restful-format handler :formats formats))
@@ -22,11 +22,11 @@
 
          :formats [:json :transit-json]
 
-         :defaults   (meta-merge api-defaults
-                                 {:params {:keywordize true
-                                           :nested true}
-                                  :responses {:absolute-redirects true
-                                              :not-modified-responses true}})
+         :defaults (meta-merge api-defaults
+                               {:params {:keywordize true
+                                         :nested true}
+                                :responses {:absolute-redirects true
+                                            :not-modified-responses true}})
 
          :secret "nobody knows this!"}})
 

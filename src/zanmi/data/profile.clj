@@ -1,5 +1,6 @@
 (ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
+            [zanmi.config :as config]
             [zanmi.util.validation :refer [defvalidator explain-validators]]
             [clojure.spec :as spec]
             [clojure.string :as string]
@@ -16,11 +17,13 @@
   :message "Must be a string.")
 
 (defvalidator short-username? [username]
-  (<= (count username) 32)
-  :message "The username can't be longer than 32 characters.")
+  (<= (count username) config/username-length)
+  :message (str "The username can't be longer than "
+                config/username-length
+                " characters."))
 
 (defvalidator strong-password? [password]
-  (>= (:score (zxcvbn/check password)) 3)
+  (>= (:score (zxcvbn/check password)) config/password-score)
 
   :message
   (let [{{:keys [suggestions warning]} :feedback} (zxcvbn/check password)]
