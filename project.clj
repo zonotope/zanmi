@@ -16,7 +16,6 @@
                  [danlentz/clj-uuid "0.1.6"]
                  [zxcvbn-clj "0.1.0-SNAPSHOT"]
 
-                 [postgres-component "0.1.0-SNAPSHOT"]
                  [honeysql "0.8.0"]
                  [funcool/clojure.jdbc "0.9.0"]
 
