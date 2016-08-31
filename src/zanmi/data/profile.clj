@@ -1,8 +1,6 @@
 (ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
             [zanmi.component.repo :as repo]
-            [zanmi.util.validation :refer [defvalidator explain-validators]]
-            [clojure.spec :as spec]
             [clojure.string :as string]
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]
@@ -12,28 +10,6 @@
 ;; validation                                                               ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvalidator string? [field]
-  (clojure.core/string? field)
-  :message "Must be a string.")
-
-(defvalidator short-username? [username]
-  (<= (count username) 32)
-  :message (str "The username can't be longer than "
-                32
-                " characters."))
-
-(defvalidator strong-password? [password]
-  (>= (:score (zxcvbn/check password)) 3)
-
-  :message
-  (let [{{:keys [suggestions warning]} :feedback} (zxcvbn/check password)]
-    (str "The password isn't strong enough. "
-         warning " "
-         (string/join " " suggestions))))
-
-(spec/def ::username (spec/and string? short-username?))
-(spec/def ::password (spec/and string? strong-password?))
-(spec/def ::profile (spec/keys :req-un [::username ::password]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility fns                                                              ;;
