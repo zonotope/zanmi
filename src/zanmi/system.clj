@@ -1,14 +1,15 @@
 (ns zanmi.system
-  (:require [com.stuartsierra.component :as component]
-            [zanmi.component.database :refer [database]]
+  (:require [zanmi.component.database :refer [database]]
             [zanmi.endpoint.profile :refer [profile-endpoint]]
+            [zanmi.data.profile :refer [profile-repo]]
+            [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
             [duct.component.handler :refer [handler-component]]
             [duct.middleware.not-found :refer [wrap-not-found]]
+            [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-            [ring.middleware.format :refer [wrap-restful-format]]
-            [meta-merge.core :refer [meta-merge]]))
+            [ring.middleware.format :refer [wrap-restful-format]]))
 
 (defn- wrap-format [handler formats]
   (wrap-restful-format handler :formats formats))
@@ -26,19 +27,25 @@
                                {:params {:keywordize true
                                          :nested true}
                                 :responses {:absolute-redirects true
-                                            :not-modified-responses true}})
+                                            :not-modified-responses true}})}
 
-         :secret "nobody knows this!"}})
+   :repo {:username-length 32
+          :password-score 3}
+
+   :secret "nobody knows this!"})
 
 (defn new-system [config]
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
-         :app  (handler-component (:app config))
-         :http (jetty-server (:http config))
-         :db   (database (:db config))
-         :profile (endpoint-component (profile-endpoint (:secret config))))
+         :app              (handler-component (:app config))
+         :db               (database (:db config))
+         :http             (jetty-server (:http config))
+         :profile-endpoint (endpoint-component
+                            (profile-endpoint (:secret config)))
+         :profile-repo     (profile-repo (:repo config)))
 
         (component/system-using
-         {:http [:app]
-          :app  [:profile]
-          :profile [:db]}))))
+         {:app              [:profile-endpoint]
+          :http             [:app]
+          :profile-endpoint [:profile-repo]
+          :profile-repo     [:db]}))))

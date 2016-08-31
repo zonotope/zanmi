@@ -37,8 +37,8 @@
 ;; auth                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-authenticated [db username password response-fn]
-  (if-let [profile (authenticate db username password)]
+(defn- when-authenticated [repo username password response-fn]
+  (if-let [profile (authenticate repo username password)]
     (response-fn profile)
     (error "bad username or password" 401)))
 
@@ -47,27 +47,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-endpoint [secret]
-  (fn [{db :db :as endpoint}]
+  (fn [{repo :repo :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
-        (let [result (create! db {:username username, :password password})]
+        (let [result (create! repo {:username username, :password password})]
           (if-let [profile (:ok result)]
             (created profile secret)
             (error (:error result) 409))))
 
       (GET "/:username" [username password]
-        (when-authenticated db username password
+        (when-authenticated repo username password
                             (fn [profile] (ok profile secret))))
 
       (PUT "/:username" [username password new-password]
-        (when-authenticated db username password
+        (when-authenticated repo username password
                             (fn [_]
-                              (let [result (update! db username new-password)]
+                              (let [result (update! repo username new-password)]
                                 (if-let [new-profile (:ok result)]
                                   (ok new-profile secret)
                                   (error (:error result) 400))))))
 
       (DELETE "/:username" [username password]
-        (when-authenticated db username password
-                            (fn [_] (when (delete! db username)
+        (when-authenticated repo username password
+                            (fn [_] (when (delete! repo username)
                                      (deleted username))))))))
