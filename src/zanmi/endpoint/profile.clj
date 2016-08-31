@@ -1,5 +1,5 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.data.profile :refer [authenticate create! delete! update!]]
+  (:require [zanmi.repo.profile :refer [authenticate create! delete! update!]]
             [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
             [compojure.core :refer [context DELETE GET PUT POST]]

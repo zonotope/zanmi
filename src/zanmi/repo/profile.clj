@@ -1,4 +1,4 @@
-(ns zanmi.data.profile
+(ns zanmi.repo.profile
   (:require [zanmi.boundary.database :as database]
             [zanmi.component.repo :refer repo-component]
             [bouncer.core :as bouncer]
