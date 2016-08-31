@@ -60,3 +60,10 @@
   (let [{:keys [hashed-password] :as profile} (fetch db username)]
     (when (hash/check password hashed-password)
       profile)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; repo                                                                     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn profile-repo [config]
+  (map->Repo config))
