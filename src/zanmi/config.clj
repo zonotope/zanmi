@@ -13,4 +13,4 @@
           :database-name (env :database-name)
           :password (env :database-password)}
    :username-length (env :username-length)
-   :password-score (env :password-score))}
+   :password-score (env :password-score)})

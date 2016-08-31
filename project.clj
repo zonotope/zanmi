@@ -16,6 +16,7 @@
                  [danlentz/clj-uuid "0.1.6"]
                  [zxcvbn-clj "0.1.0-SNAPSHOT"]
 
+                 [hikari-cp "1.7.3"]
                  [honeysql "0.8.0"]
                  [funcool/clojure.jdbc "0.9.0"]
 

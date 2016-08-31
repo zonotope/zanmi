@@ -44,16 +44,16 @@
 
 (defn- create-table! [db]
   (with-open [conn (jdbc/connection (make-connection-spec db))]
-    (let [length 32])
-    (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
-                            "  id UUID PRIMARY KEY NOT NULL,"
-                            "  username VARCHAR(" length ") NOT NULL UNIQUE,"
-                            "  hashed_password VARCHAR(128) NOT NULL,"
-                            "  created TIMESTAMP WITHOUT TIME ZONE"
-                            "          DEFAULT (now() at time zone 'utc'),"
-                            "  modified TIMESTAMP WITHOUT TIME ZONE"
-                            "           DEFAULT (now() at time zone 'utc')"
-                            ")"))))
+    (let [length 32]
+      (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
+                              "  id UUID PRIMARY KEY NOT NULL,"
+                              "  username VARCHAR(" length ") NOT NULL UNIQUE,"
+                              "  hashed_password VARCHAR(128) NOT NULL,"
+                              "  created TIMESTAMP WITHOUT TIME ZONE"
+                              "          DEFAULT (now() at time zone 'utc'),"
+                              "  modified TIMESTAMP WITHOUT TIME ZONE"
+                              "           DEFAULT (now() at time zone 'utc')"
+                              ")")))))
 
 (defn- set-modified-trigger! [db]
   (with-open [conn (jdbc/connection (make-connection-spec db))]
