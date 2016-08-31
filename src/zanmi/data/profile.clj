@@ -1,6 +1,6 @@
 (ns zanmi.data.profile
   (:require [zanmi.boundary.database :as database]
-            [zanmi.component.repo :refer repo]
+            [zanmi.component.repo :refer repo-component]
             [bouncer.core :as bouncer]
             [bouncer.validators :as validators]
             [buddy.hashers :as hash]
@@ -74,7 +74,7 @@
       profile)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; repo                                                                     ;;
+;; component                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-repo [{:keys [username-length password-score]} :as config]
@@ -84,4 +84,4 @@
                 :password [validators/required
                            validators/string
                            [strong-password? password-score]]}]
-    (repo schema)))
+    (repo-component schema)))

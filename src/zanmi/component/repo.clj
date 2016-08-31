@@ -1,10 +1,10 @@
 (ns zanmi.component.repo
   (:require [com.stuartsierra.component :as component]))
 
-(defrecord Repo [schema]
+(defrecord RepoComponent [schema]
   component/Lifecycle
   (start [repo] repo)
   (stop [repo] repo))
 
-(defn repo [schema]
-  (->Repo schema))
+(defn repo-component [schema]
+  (->RepoComponent schema))
