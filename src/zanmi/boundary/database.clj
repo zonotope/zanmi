@@ -7,7 +7,7 @@
   (destroy! [db]
     "drop the database specified by `db`")
   (create! [db attrs]
-    "save the new profile for `username` with `password` in `db`")
+    "save the new profile with `attrs` in `db`")
   (fetch [db username]
     "fetch the profile for `username` from `db`")
   (update! [db username new-password]
