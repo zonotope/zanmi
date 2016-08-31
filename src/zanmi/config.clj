@@ -14,9 +14,3 @@
           :password (env :database-password)}
    :username-length (env :username-length)
    :password-score (env :password-score))}
-
-(def username-length
-  (or (:username-length environ) (:username-length defaults)))
-
-(def password-score
-  (or (:password-score environ) (:password-score defaults)))
