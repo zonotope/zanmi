@@ -65,7 +65,7 @@
 ;; password validation                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvalidator strong-password
+(defvalidator min-password-score
   {:message-fn (fn [path value]
                  (let [{:keys [suggestions warning]} (:feedback
                                                       (zxcvbn/check value))
@@ -88,5 +88,6 @@
 
                 :password [required
                            string
-                           [strong-password password-score]]}]
+                           [min-password-score password-score]]}]
+
     (repo-component schema)))
