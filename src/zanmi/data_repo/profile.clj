@@ -1,6 +1,6 @@
-(ns zanmi.repo.profile
+(ns zanmi.data-repo.profile
   (:require [zanmi.boundary.database :as database]
-            [zanmi.component.repo :refer [repo-component]]
+            [zanmi.component.data-repo :refer [data-repo-component]]
             [zanmi.util.validation :refer [validate]]
             [bouncer.validators :refer [defvalidator max-count required string]]
             [buddy.hashers :as hash]
@@ -78,7 +78,7 @@
       strength))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; repo                                                                     ;;
+;; data repo                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-repo [{:keys [username-length password-score]}]
@@ -90,4 +90,4 @@
                            string
                            [min-password-score password-score]]}]
 
-    (repo-component schema)))
+    (data-repo-component schema)))

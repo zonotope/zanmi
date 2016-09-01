@@ -1,7 +1,7 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
             [zanmi.endpoint.profile :refer [profile-endpoint]]
-            [zanmi.repo.profile :refer [profile-repo]]
+            [zanmi.data-repo.profile :refer [profile-repo]]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
             [duct.component.handler :refer [handler-component]]
@@ -29,8 +29,8 @@
                                 :responses {:absolute-redirects true
                                             :not-modified-responses true}})}
 
-   :repo {:username-length 32
-          :password-score 3}
+   :profile-repo {:username-length 32
+                  :password-score 3}
 
    :secret "nobody knows this!"})
 
@@ -42,7 +42,7 @@
          :http             (jetty-server (:http config))
          :profile-endpoint (endpoint-component
                             (profile-endpoint (:secret config)))
-         :profile-repo     (profile-repo (:repo config)))
+         :profile-repo     (profile-repo (:profile-repo config)))
 
         (component/system-using
          {:app              [:profile-endpoint]
