@@ -1,17 +1,17 @@
 (ns zanmi.component.database.postgres
   (:require [zanmi.boundary.database :as database]
             [zanmi.config :as config]
+            [camel-snake-kebab.core :refer [->kebab-case-keyword]]
+            [clojure.string :refer [join]]
+            [clojure.set :refer [rename-keys]]
+            [com.stuartsierra.component :as component]
+            [hikari-cp.core :refer [make-datasource close-datasource]]
             [honeysql.core :as sql]
             [honeysql.format :as fmt]
             [honeysql.helpers :as sql-helper :refer [defhelper delete-from
                                                      from insert-into select
                                                      sset update values where]]
-            [jdbc.core :as jdbc]
-            [hikari-cp.core :refer [make-datasource close-datasource]]
-            [camel-snake-kebab.core :refer [->kebab-case-keyword]]
-            [clojure.string :refer [join]]
-            [clojure.set :refer [rename-keys]]
-            [com.stuartsierra.component :as component]))
+            [jdbc.core :as jdbc]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; db connection specs                                                      ;;
@@ -44,16 +44,16 @@
 
 (defn- create-table! [db]
   (with-open [conn (jdbc/connection (make-connection-spec db))]
-    (let [length config/username-length])
-    (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
-                            "  id UUID PRIMARY KEY NOT NULL,"
-                            "  username VARCHAR(" length ") NOT NULL UNIQUE,"
-                            "  hashed_password VARCHAR(128) NOT NULL,"
-                            "  created TIMESTAMP WITHOUT TIME ZONE"
-                            "          DEFAULT (now() at time zone 'utc'),"
-                            "  modified TIMESTAMP WITHOUT TIME ZONE"
-                            "           DEFAULT (now() at time zone 'utc')"
-                            ")"))))
+    (let [length 32]
+      (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
+                              "  id UUID PRIMARY KEY NOT NULL,"
+                              "  username VARCHAR(" length ") NOT NULL UNIQUE,"
+                              "  hashed_password VARCHAR(128) NOT NULL,"
+                              "  created TIMESTAMP WITHOUT TIME ZONE"
+                              "          DEFAULT (now() at time zone 'utc'),"
+                              "  modified TIMESTAMP WITHOUT TIME ZONE"
+                              "           DEFAULT (now() at time zone 'utc')"
+                              ")")))))
 
 (defn- set-modified-trigger! [db]
   (with-open [conn (jdbc/connection (make-connection-spec db))]

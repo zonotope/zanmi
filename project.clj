@@ -16,14 +16,17 @@
                  [danlentz/clj-uuid "0.1.6"]
                  [zxcvbn-clj "0.1.0-SNAPSHOT"]
 
-                 [honeysql "0.8.0"]
                  [funcool/clojure.jdbc "0.9.0"]
+                 [hikari-cp "1.7.3"]
+                 [honeysql "0.8.0"]
+                 [org.postgresql/postgresql "9.4.1208"]
 
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
                  [ring-middleware-format "0.7.0"]
                  [ring-jetty-component "0.3.1"]
 
+                 [bouncer "1.0.0"]
                  [camel-snake-kebab "0.4.0"]
                  [environ "1.1.0"]
                  [meta-merge "0.1.1"]]

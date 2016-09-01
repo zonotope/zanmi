@@ -1,21 +1,11 @@
 (ns zanmi.util.validation
-  (:require [clojure.spec :as spec]))
+  (:require [bouncer.core :as bouncer]))
 
-(let [error-fn-registry (atom {})]
-  (defn register-error-fn! [sym message]
-    (swap! error-fn-registry #(assoc % sym message)))
+(defn- with-fn-messages [{:keys [message metadata path value] :as error}]
+  (let [message-fn (:message-fn metadata)]
+    (if (and (fn? message-fn) (not message))
+      (message-fn path value)
+      (bouncer/with-default-messages error))))
 
-  (defn- error-fn [sym]
-    (sym @error-fn-registry)))
-
-(defn- error-message [sym data]
-  ((error-fn sym) data))
-
-(defmacro defvalidator [sym binding validation error-key message-body]
-  `(let [message-fn# (fn ~binding ~message-body)]
-     (register-error-fn! (quote ~sym) message-fn#)
-     (defn ~sym ~binding ~validation)))
-
-(defn explain-validators [spec data]
-  (if-let [problems (::spec/problems (spec/explain-data spec data))]
-    (map #(error-message (:pred %) (:val %)) problems)))
+(defn validate [data schema]
+  (bouncer/validate with-fn-messages data schema))
