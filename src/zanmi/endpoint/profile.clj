@@ -1,9 +1,8 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.data.profile :refer [authenticate create! delete!
-                                             update!]]
+  (:require [zanmi.data.profile :refer [authenticate create! delete! update!]]
             [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
-            [compojure.core :refer [context DELETE GET PUT POST]]
+            [compojure.core :refer [context DELETE GET POST PUT]]
             [ring.util.response :as response :refer [response]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -19,9 +18,6 @@
 ;; responses                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- ok [profile secret]
-  (response (render-token profile secret)))
-
 (defn- created [profile secret]
   (response/created (resource-url profile)
                     (render-token profile secret)))
@@ -33,6 +29,9 @@
 (defn- error [e status]
   (-> (response (render-error e))
       (assoc :status status)))
+
+(defn- ok [profile secret]
+  (response (render-token profile secret)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auth                                                                     ;;
@@ -63,12 +62,11 @@
 
       (PUT "/:username" [username password new-password]
         (when-authenticated profile-repo username password
-                            (fn [_]
-                              (let [result (update! profile-repo
-                                                    username new-password)]
-                                (if-let [new-profile (:ok result)]
-                                  (ok new-profile secret)
-                                  (error (:error result) 400))))))
+                            (fn [_] (let [result (update! profile-repo
+                                                         username new-password)]
+                                     (if-let [new-profile (:ok result)]
+                                       (ok new-profile secret)
+                                       (error (:error result) 400))))))
 
       (DELETE "/:username" [username password]
         (when-authenticated profile-repo username password
