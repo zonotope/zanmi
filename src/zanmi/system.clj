@@ -30,6 +30,7 @@
                                             :not-modified-responses true}})}
 
    :profile-repo {:username-length 32
+                  :password-length 64
                   :password-score 3}
 
    :secret "nobody knows this!"})

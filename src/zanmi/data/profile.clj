@@ -75,13 +75,14 @@
 ;; data repo                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn profile-repo [{:keys [username-length password-score]}]
+(defn profile-repo [{:keys [username-length password-length password-score]}]
   (let [schema {:username [required
                            string
                            [max-count username-length]]
 
                 :password [required
                            string
+                           [max-count password-length]
                            [min-password-score password-score]]}]
 
     (repo-component schema)))
