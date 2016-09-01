@@ -1,43 +1,22 @@
 (ns zanmi.repo.profile
   (:require [zanmi.boundary.database :as database]
             [zanmi.component.repo :refer [repo-component]]
-            [bouncer.core :as bouncer]
-            [bouncer.validators :as validators]
+            [zanmi.util.validation :refer [validate]]
+            [bouncer.validators :refer [defvalidator max-count required string]]
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]
             [clojure.string :as string]
             [zxcvbn.core :as zxcvbn]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; validation                                                               ;;
+;; utility fns                                                              ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- strong-password? [password strength]
-  (>= (:score (zxcvbn/check password))
-      strength))
-
-(defn- password-message [{:keys [path value]}]
-  (let [{{:keys [suggestions warning]} :feedback} (zxcvbn/check value)]
-    (str "The " path " isn't strong enough. "
-         warning " "
-         (string/join " " suggestions))))
-
-(defn- profile-message-fn [{:keys [path message value]
-                            {:keys [default-message-format]} :metadata
-                            :as validation-result}]
-  (cond (= [:password] path) (password-message [validation-result])
-        message message
-        :else (format default-message-format value)))
-
 (defn- when-valid [data schema validated-fn]
-  (let [[errors validated] (bouncer/validate profile-message-fn data schema)]
+  (let [[errors validated] (validate data schema)]
     (if errors
       {:error errors}
       {:ok (validated-fn validated)})))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; utility fns                                                              ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- hash-password [{:keys [password] :as attrs}]
   (-> attrs
@@ -83,16 +62,31 @@
       profile)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; password validation                                                      ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvalidator strong-password
+  {:message-fn (fn [path value]
+                 (let [{:keys [suggestions warning]} (:feedback
+                                                      (zxcvbn/check value))
+                       path-name (name (peek path))]
+                   (str "The " path-name " is too weak. "
+                        warning " "
+                        (string/join " " suggestions))))}
+  [password strength]
+  (>= (:score (zxcvbn/check password))
+      strength))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; repo                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-repo [{:keys [username-length password-score]}]
-  (let [schema {:username [validators/required
-                           validators/string
-                           [validators/max-count username-length]]
+  (let [schema {:username [required
+                           string
+                           [max-count username-length]]
 
-                :password [validators/required
-                           validators/string
-                           [strong-password? password-score]]}]
-
+                :password [required
+                           string
+                           [strong-password password-score]]}]
     (repo-component schema)))
