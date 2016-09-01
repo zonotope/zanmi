@@ -1,5 +1,5 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.data-repo.profile :refer [authenticate create! delete!
+  (:require [zanmi.data.profile :refer [authenticate create! delete!
                                              update!]]
             [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
@@ -48,7 +48,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-endpoint [secret]
-  (fn [{profile-repo :profile-repo :as endpoint}]
+  (fn [{:keys [profile-repo] :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
         (let [result (create! profile-repo

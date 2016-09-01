@@ -1,7 +1,7 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
             [zanmi.endpoint.profile :refer [profile-endpoint]]
-            [zanmi.data-repo.profile :refer [profile-repo]]
+            [zanmi.data.profile :refer [profile-repo]]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
             [duct.component.handler :refer [handler-component]]
