@@ -12,16 +12,25 @@
 ;; validation                                                               ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- short-username? [username length]
-  (<= (count username)
-      length))
-
 (defn- strong-password? [password strength]
   (>= (:score (zxcvbn/check password))
       strength))
 
+(defn- password-message [{:keys [path value]}]
+  (let [{{:keys [suggestions warning]} :feedback} (zxcvbn/check value)]
+    (str "The " path " isn't strong enough. "
+         warning " "
+         (string/join " " suggestions))))
+
+(defn- profile-message-fn [{:keys [path message value]
+                            {:keys [default-message-format]} :metadata
+                            :as validation-result}]
+  (cond (= [:password] path) (password-message [validation-result])
+        message message
+        :else (format default-message-format value)))
+
 (defn- when-valid [data schema validated-fn]
-  (let [[errors validated] (bouncer/validate data schema)]
+  (let [[errors validated] (bouncer/validate profile-message-fn data schema)]
     (if errors
       {:error errors}
       {:ok (validated-fn validated)})))
@@ -55,7 +64,7 @@
 
 (defn update! [{:keys [db schema]} username new-password]
   (let [attr {:password new-password}
-        validator (select-keys [:password] schema)]
+        validator (select-keys schema [:password])]
     (when-valid attr validator
                 (fn [valid-attr] (->> valid-attr
                                      (hash-password)
@@ -68,7 +77,7 @@
 ;; auth                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn authenticate [{:keys [db schema]} username password]
+(defn authenticate [{db :db} username password]
   (let [{:keys [hashed-password] :as profile} (fetch db username)]
     (when (hash/check password hashed-password)
       profile)))
@@ -80,8 +89,10 @@
 (defn profile-repo [{:keys [username-length password-score]}]
   (let [schema {:username [validators/required
                            validators/string
-                           [short-username? username-length]]
+                           [validators/max-count username-length]]
+
                 :password [validators/required
                            validators/string
                            [strong-password? password-score]]}]
+
     (repo-component schema)))

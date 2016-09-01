@@ -37,8 +37,8 @@
 ;; auth                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-authenticated [repo username password response-fn]
-  (if-let [profile (authenticate repo username password)]
+(defn- when-authenticated [profile-repo username password response-fn]
+  (if-let [profile (authenticate profile-repo username password)]
     (response-fn profile)
     (error "bad username or password" 401)))
 
@@ -47,27 +47,29 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-endpoint [secret]
-  (fn [{repo :repo :as endpoint}]
+  (fn [{profile-repo :profile-repo :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
-        (let [result (create! repo {:username username, :password password})]
+        (let [result (create! profile-repo
+                              {:username username, :password password})]
           (if-let [profile (:ok result)]
             (created profile secret)
             (error (:error result) 409))))
 
       (GET "/:username" [username password]
-        (when-authenticated repo username password
+        (when-authenticated profile-repo username password
                             (fn [profile] (ok profile secret))))
 
       (PUT "/:username" [username password new-password]
-        (when-authenticated repo username password
+        (when-authenticated profile-repo username password
                             (fn [_]
-                              (let [result (update! repo username new-password)]
+                              (let [result (update! profile-repo
+                                                    username new-password)]
                                 (if-let [new-profile (:ok result)]
                                   (ok new-profile secret)
                                   (error (:error result) 400))))))
 
       (DELETE "/:username" [username password]
-        (when-authenticated repo username password
-                            (fn [_] (when (delete! repo username)
+        (when-authenticated profile-repo username password
+                            (fn [_] (when (delete! profile-repo username)
                                      (deleted username))))))))
