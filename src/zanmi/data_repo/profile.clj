@@ -1,7 +1,7 @@
 (ns zanmi.data-repo.profile
   (:require [zanmi.boundary.database :as database]
             [zanmi.component.data-repo :refer [data-repo-component]]
-            [zanmi.util.validation :refer [validate]]
+            [zanmi.util.validation :refer [when-valid]]
             [bouncer.validators :refer [defvalidator max-count required string]]
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]
@@ -11,12 +11,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility fns                                                              ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn- when-valid [data schema validated-fn]
-  (let [[errors validated] (validate data schema)]
-    (if errors
-      {:error errors}
-      {:ok (validated-fn validated)})))
 
 (defn- hash-password [{:keys [password] :as attrs}]
   (-> attrs
