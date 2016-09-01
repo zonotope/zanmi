@@ -23,8 +23,8 @@
                     (render-token profile secret)))
 
 (defn- deleted [username]
-  (let [deleted-message (str username " deleted")]
-    (response (render-message (deleted-message username)))))
+  (let [deleted-message (format "profile for '%s' deleted" username)]
+    (response (render-message deleted-message))))
 
 (defn- error [e status]
   (-> (response (render-error e))
