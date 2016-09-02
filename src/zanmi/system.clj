@@ -1,5 +1,6 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
+            [zanmi.component.logger :refer [logger]]
             [zanmi.endpoint.profile :refer [profile-endpoint]]
             [zanmi.data.profile :refer [profile-repo]]
             [com.stuartsierra.component :as component]
@@ -29,6 +30,8 @@
                                 :responses {:absolute-redirects true
                                             :not-modified-responses true}})}
 
+   :logger {}
+
    :profile-repo {:username-length 32
                   :password-length 64
                   :password-score 3}
@@ -41,12 +44,13 @@
          :app              (handler-component (:app config))
          :db               (database (:db config))
          :http             (jetty-server (:http config))
+         :logger           (loger (:logger config))
          :profile-endpoint (endpoint-component
                             (profile-endpoint (:secret config)))
          :profile-repo     (profile-repo (:profile-repo config)))
 
         (component/system-using
-         {:app              [:profile-endpoint]
+         {:app              [:profile-endpoint :logger]
           :http             [:app]
           :profile-endpoint [:profile-repo]
-          :profile-repo     [:db]}))))
+          :profile-repo     [:db :logger]}))))
