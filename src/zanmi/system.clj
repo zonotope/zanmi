@@ -1,24 +1,29 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
             [zanmi.component.logger :refer [logger]]
-            [zanmi.endpoint.profile :refer [profile-endpoint]]
             [zanmi.data.profile :refer [profile-repo]]
+            [zanmi.endpoint.profile :refer [profile-endpoint]]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
             [duct.component.handler :refer [handler-component]]
             [duct.middleware.not-found :refer [wrap-not-found]]
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
+            [ring.logger :refer [wrap-with-logger]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.format :refer [wrap-restful-format]]))
 
 (defn- wrap-format [handler formats]
   (wrap-restful-format handler :formats formats))
 
+(defn- wrap-logger [handler logger]
+  (wrap-with-logger handler {:logger logger}))
+
 (def base-config
   {:app {:middleware [[wrap-format :formats]
                       [wrap-not-found :not-found]
-                      [wrap-defaults :defaults]]
+                      [wrap-defaults :defaults]
+                      [wrap-logger :logger]]
 
          :not-found "Resource Not Found"
 

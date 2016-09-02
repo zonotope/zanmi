@@ -23,6 +23,7 @@
 
                  [ring "1.4.0"]
                  [ring-jetty-component "0.3.1"]
+                 [ring-logger "0.7.6"]
                  [ring/ring-defaults "0.2.0"]
                  [ring-middleware-format "0.7.0"]
 
