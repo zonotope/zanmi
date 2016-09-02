@@ -3,21 +3,14 @@
             [zanmi.component.logger :refer [logger]]
             [zanmi.data.profile :refer [profile-repo]]
             [zanmi.endpoint.profile :refer [profile-endpoint]]
+            [zanmi.util.middleware :refer [wrap-format wrap-logger]]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
             [duct.component.handler :refer [handler-component]]
             [duct.middleware.not-found :refer [wrap-not-found]]
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
-            [ring.logger :refer [wrap-with-logger]]
-            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-            [ring.middleware.format :refer [wrap-restful-format]]))
-
-(defn- wrap-format [handler formats]
-  (wrap-restful-format handler :formats formats))
-
-(defn- wrap-logger [handler logger]
-  (wrap-with-logger handler {:logger logger}))
+            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]))
 
 (def base-config
   {:app {:middleware [[wrap-format :formats]
@@ -35,7 +28,8 @@
                                 :responses {:absolute-redirects true
                                             :not-modified-responses true}})}
 
-   :logger {}
+   :logger {:level :info
+            :appenders {}}
 
    :profile-repo {:username-length 32
                   :password-length 64
@@ -55,7 +49,7 @@
          :profile-repo     (profile-repo (:profile-repo config)))
 
         (component/system-using
-         {:app              [:profile-endpoint :logger]
+         {:app              [:logger :profile-endpoint]
           :http             [:app]
           :profile-endpoint [:logger :profile-repo]
           :profile-repo     [:db]}))))
