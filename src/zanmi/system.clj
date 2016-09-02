@@ -19,7 +19,7 @@
                       [wrap-not-found :not-found]
                       [wrap-defaults :defaults]]
 
-         :not-found  "Resource Not Found"
+         :not-found "Resource Not Found"
 
          :formats [:json :transit-json]
 
