@@ -57,5 +57,5 @@
         (component/system-using
          {:app              [:profile-endpoint :logger]
           :http             [:app]
-          :profile-endpoint [:profile-repo]
-          :profile-repo     [:db :logger]}))))
+          :profile-endpoint [:logger :profile-repo]
+          :profile-repo     [:db]}))))
