@@ -1,6 +1,6 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
-            [zanmi.component.logger :refer [logger]]
+            [zanmi.component.logger :refer [timbre-logger]]
             [zanmi.data.profile :refer [profile-repo]]
             [zanmi.endpoint.profile :refer [profile-endpoint]]
             [zanmi.util.middleware :refer [wrap-format wrap-logger]]
@@ -29,7 +29,8 @@
                                             :not-modified-responses true}})}
 
    :logger {:level :info
-            :appenders {}}
+            :path "log/zanmi.log"
+            :pattern :daily}
 
    :profile-repo {:username-length 32
                   :password-length 64
@@ -43,7 +44,7 @@
          :app              (handler-component (:app config))
          :db               (database (:db config))
          :http             (jetty-server (:http config))
-         :logger           (loger (:logger config))
+         :logger           (timbre-logger (:logger config))
          :profile-endpoint (endpoint-component
                             (profile-endpoint (:secret config)))
          :profile-repo     (profile-repo (:profile-repo config)))
