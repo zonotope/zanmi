@@ -1,14 +1,18 @@
 (ns zanmi.main
   (:gen-class)
-  (:require [com.stuartsierra.component :as component]
+  (:require [zanmi.config :as config]
+            [zanmi.system :refer [new-system]]
+            [com.stuartsierra.component :as component]
             [duct.middleware.errors :refer [wrap-hide-errors]]
             [duct.util.runtime :refer [add-shutdown-hook]]
-            [meta-merge.core :refer [meta-merge]]
-            [zanmi.config :as config]
-            [zanmi.system :refer [new-system]]))
+            [ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect]]
+            [meta-merge.core :refer [meta-merge]]))
 
 (def prod-config
-  {:app {:middleware     [[wrap-hide-errors :internal-error]]
+  {:app {:middleware [[wrap-hide-errors :internal-error]
+                      wrap-hsts
+                      wrap-ssl-redirect]
+
          :internal-error "Internal Server Error"}})
 
 (def config
