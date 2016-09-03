@@ -12,8 +12,8 @@
   (log [logger level throwable message]
     (timbre/log* logger level throwable message)))
 
-(defn wrap-format [handler formats]
-  (wrap-restful-format handler :formats formats))
-
 (defn wrap-logger [handler logger]
   (wrap-with-logger handler {:logger logger}))
+
+(defn wrap-format [handler formats]
+  (wrap-restful-format handler :formats formats))
