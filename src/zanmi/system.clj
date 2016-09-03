@@ -28,6 +28,10 @@
                                 :responses {:absolute-redirects true
                                             :not-modified-responses true}})}
 
+   :db {:username "zanmi"}
+
+   :http {:port 3000}
+
    :logger {:level :info
             :path "log/zanmi.log"
             :pattern :daily}

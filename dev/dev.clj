@@ -17,8 +17,7 @@
   {:app {:middleware [wrap-stacktrace]}})
 
 (def config
-  (meta-merge config/defaults
-              config/environ
+  (meta-merge config/environ
               dev-config))
 
 (defn new-system []
