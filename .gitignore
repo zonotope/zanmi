@@ -10,3 +10,4 @@ pom.xml.asc
 /.dir-locals.el
 /profiles.clj
 dev/local.clj
+log/

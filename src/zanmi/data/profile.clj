@@ -50,8 +50,8 @@
 ;; auth                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn authenticate [{db :db} username password]
-  (let [{:keys [hashed-password] :as profile} (fetch db username)]
+(defn authenticate [repo username password]
+  (let [{:keys [hashed-password] :as profile} (fetch repo username)]
     (when (hash/check password hashed-password)
       profile)))
 
