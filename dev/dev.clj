@@ -20,7 +20,7 @@
         :username "zanmi"
         :password "zanmi-password"
         :host "localhost"
-        :database-name "zanmi_dev"}
+        :db-name "zanmi_dev"}
 
    :http {:port 3000}
 

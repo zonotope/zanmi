@@ -148,9 +148,10 @@
     (execute db-spec (-> (delete-from table)
                          (where [:= :username username])))))
 
-(defn postgres [{host :host :as config}]
+(defn postgres [{:keys [db-name host] :as config}]
   (-> config
-      (dissoc :engine :host)
+      (dissoc :engine :host :db-name)
       (assoc :adapter "postgresql"
-             :server-name host)
+             :server-name host
+             :database-name db-name)
       (map->Postgres)))
