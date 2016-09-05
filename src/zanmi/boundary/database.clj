@@ -10,7 +10,7 @@
     "save the new profile with `attrs` in `db`")
   (fetch [db username]
     "fetch the profile for `username` from `db`")
-  (update! [db username new-password]
-    "update the saved profile for `username` with `new-password` in `db`")
+  (update! [db username attrs]
+    "update the saved profile for `username` with `attrs` in `db`")
   (delete! [db username]
     "remove the profile for `username` from `db`"))
