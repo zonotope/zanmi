@@ -14,7 +14,24 @@
             [zanmi.system :as system]))
 
 (def dev-config
-  {:app {:middleware [wrap-stacktrace]}})
+  {:app {:middleware [wrap-stacktrace]}
+
+   :db {:username "zanmi"
+        :password "zanmi-password"
+        :server-name "localhost"
+        :database-name "zanmi_dev"}
+
+   :http {:port 3000}
+
+   :profile-repo {:username-length 32
+                  :password-length 64
+                  :password-score 3}
+
+   :logger {:level :info
+            :path "log/zanmi.log"
+            :pattern :daily}
+
+   :secret "nobody knows this!"})
 
 (def config
   (meta-merge config/defaults

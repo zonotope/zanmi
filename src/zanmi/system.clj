@@ -26,19 +26,7 @@
                                {:params {:keywordize true
                                          :nested true}
                                 :responses {:absolute-redirects true
-                                            :not-modified-responses true}})}
-
-   :db {:username "zanmi"}
-
-   :logger {:level :info
-            :path "log/zanmi.log"
-            :pattern :daily}
-
-   :profile-repo {:username-length 32
-                  :password-length 64
-                  :password-score 3}
-
-   :secret "nobody knows this!"})
+                                            :not-modified-responses true}})}})
 
 (defn new-system [config]
   (let [config (meta-merge base-config config)]
