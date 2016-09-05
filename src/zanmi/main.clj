@@ -16,7 +16,8 @@
          :internal-error "Internal Server Error"}})
 
 (def config
-  (meta-merge config/environ
+  (meta-merge config/defaults
+              config/environ
               prod-config))
 
 (defn -main [& args]

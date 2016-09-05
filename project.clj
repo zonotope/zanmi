@@ -54,16 +54,19 @@
 
    :profiles/test {}
 
-   :project/dev   {:dependencies [[org.clojure/test.check "0.9.0"]
+   :project/dev   {:dependencies [[com.gearswithingears/shrubbery "0.4.1"]
                                   [duct/generate "0.7.0"]
-                                  [reloaded.repl "0.2.2"]
+                                  [eftest "0.1.1"]
+                                  [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.12"]
-                                  [eftest "0.1.1"]
-                                  [com.gearswithingears/shrubbery "0.3.1"]
-                                  [kerodon "0.7.0"]]
+                                  [kerodon "0.7.0"]
+                                  [reloaded.repl "0.2.2"]]
+
                    :source-paths ["dev"]
+
                    :repl-options {:init-ns user}
+
                    :env {:port "3000"
                          :database-host "localhost"
                          :database-name "zanmi_dev"
