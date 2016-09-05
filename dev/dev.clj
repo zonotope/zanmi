@@ -16,9 +16,10 @@
 (def dev-config
   {:app {:middleware [wrap-stacktrace]}
 
-   :db {:username "zanmi"
+   :db {:engine "postgres"
+        :username "zanmi"
         :password "zanmi-password"
-        :server-name "localhost"
+        :host "localhost"
         :database-name "zanmi_dev"}
 
    :http {:port 3000}
