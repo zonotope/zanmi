@@ -1,5 +1,8 @@
 (ns zanmi.component.database
-  (:require [zanmi.component.database.postgres :refer [postgres]]))
+  (:require [zanmi.component.database.mongo :refer [mongo]]
+            [zanmi.component.database.postgres :refer [postgres]]))
 
 (defn database [config]
-  (postgres config))
+  (case (:engine config)
+    "postgres" (postgres config)
+    "mongo"    (mongo config)))
