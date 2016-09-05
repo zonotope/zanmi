@@ -16,7 +16,7 @@
 (def dev-config
   {:app {:middleware [wrap-stacktrace]}
 
-   :db {:engine "postgres"
+   :db {:engine "mongo"
         :username "zanmi"
         :password "zanmi-password"
         :host "localhost"
