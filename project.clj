@@ -21,6 +21,8 @@
                  [honeysql "0.8.0"]
                  [org.postgresql/postgresql "9.4.1208"]
 
+                 [com.novemberain/monger "3.0.2"]
+
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
                  [ring/ring-ssl "0.2.1"]
