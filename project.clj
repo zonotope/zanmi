@@ -32,6 +32,7 @@
 
                  [bouncer "1.0.0"]
                  [camel-snake-kebab "0.4.0"]
+                 [clj-time "0.12.0"]
                  [environ "1.1.0"]
                  [meta-merge "0.1.1"]
                  [com.taoensso/timbre "4.7.4"]]
