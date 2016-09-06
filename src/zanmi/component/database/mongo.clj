@@ -8,7 +8,8 @@
             [com.stuartsierra.component :as component]
             [monger.core :as mongo]
             [monger.collection :as collection]
-            [monger.credentials :as credentials]))
+            [monger.credentials :as credentials]
+            [monger.operators :refer [$set]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; key sanitization                                                         ;;
@@ -81,7 +82,7 @@
   (update! [{db :db} username attrs]
     (doc->map (collection/find-and-modify db collection
                                           {:username username}
-                                          (map->doc attrs)
+                                          {$set (map->doc attrs)}
                                           {:return-new true})))
 
   (delete! [{db :db} username]
