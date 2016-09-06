@@ -77,13 +77,20 @@
     (doc->map (collection/find-one-as-map db collection {:username username})))
 
   (create! [{db :db} attrs]
-    (doc->map (collection/insert-and-return db collection (map->doc attrs))))
+    (let [now (time/now)
+          timestamped-attrs (assoc attrs :created now :modified now)]
+      (->> timestamped-attrs
+           (map->doc)
+           (collection/insert-and-return db collection)
+           (doc->map))))
 
   (update! [{db :db} username attrs]
-    (doc->map (collection/find-and-modify db collection
-                                          {:username username}
-                                          {$set (map->doc attrs)}
-                                          {:return-new true})))
+    (let [now (time/now)
+          timestamped-attrs (assoc attrs :modified now)]
+      (doc->map (collection/find-and-modify db collection
+                                            {:username username}
+                                            {$set (map->doc timestamped-attrs)}
+                                            {:return-new true}))))
 
   (delete! [{db :db} username]
     (collection/remove db collection {:username username})))
