@@ -11,18 +11,6 @@
             [monger.credentials :as credentials]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; utils                                                                    ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def ^:private collection "profiles")
-
-(defn- execute [{db :db} cmd & opts]
-  (let [command-key (->camelCaseKeyword cmd)
-        command-map (-> (array-map command-key 1)
-                        (merge opts))]
-    (mongo/command db command-map)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; key sanitization                                                         ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -36,6 +24,22 @@
 
 (defn- doc->map [d]
   (transform-keys d ->kebab-case-keyword))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; query utils                                                              ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def ^:private collection "profiles")
+
+(defn- execute [{db :db} cmd & args]
+  (let [mongo-args (->> args
+                        (map map->doc)
+                        (cons collection)
+                        (cons db))]
+    (apply cmd mongo-args)))
+
+(defn- execute-map [mongo cmd & args]
+  (doc->map (execute mongo cmd args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; component                                                                ;;
@@ -65,8 +69,8 @@
     (collection/create db collection {:capped false})
     (collection/ensure-index db collection {:username 1} {:unique true}))
 
-  (destroy! [mongo]
-    (execute mongo :drop-database))
+  (destroy! [{db :db}]
+    (mongo/command db {:dropDatabase 1}))
 
   (fetch [{db :db} username]
     (doc->map (collection/find-one-as-map db collection {:username username})))
@@ -77,7 +81,8 @@
   (update! [{db :db} username attrs]
     (doc->map (collection/find-and-modify db collection
                                           {:username username}
-                                          (map->doc attrs))))
+                                          (map->doc attrs)
+                                          {:return-new true})))
 
   (delete! [{db :db} username]
     (collection/remove db collection {:username username})))
