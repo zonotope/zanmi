@@ -21,7 +21,7 @@
   ([m f]
    (transform-keys m f {}))
   ([m f overrides]
-   (let [keymap (-> (into {} (map #(vector % (f %))) (keys m))
+   (let [keymap (-> (into {} (for [k (keys m)] [k (f k)]))
                     (merge overrides))]
      (rename-keys m keymap))))
 
