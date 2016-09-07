@@ -46,33 +46,33 @@
             db   (mongo/get-db conn db-name)]
         (assoc mongo
                :connection conn
-               :db db))))
+               :database db))))
 
   (stop [mongo]
     (if-let [conn (:connection mongo)]
       (do (mongo/disconnect conn)
-          (dissoc mongo :connection :db))
+          (dissoc mongo :connection :database))
       mongo))
 
   database/Database
-  (initialize! [{db :db}]
+  (initialize! [{db :database}]
     (collection/create db collection {:capped false})
     (collection/ensure-index db collection {:username 1} {:unique true}))
 
-  (destroy! [{db :db}]
+  (destroy! [{db :database}]
     (mongo/command db {:dropDatabase 1}))
 
-  (fetch [{db :db} username]
+  (fetch [{db :database} username]
     (let [attr {:username username}]
       (doc->map (collection/find-one-as-map db collection attr))))
 
-  (create! [{db :db} attrs]
+  (create! [{db :database} attrs]
     (let [now (time/now)
           timestamped-attrs (assoc attrs :created now :modified now)
           attrs-doc (map->doc timestamped-attrs)]
       (doc->map (collection/insert-and-return db collection attrs-doc))))
 
-  (update! [{db :db} username attrs]
+  (update! [{db :database} username attrs]
     (let [now (time/now)
           timestamped-attrs (assoc attrs :modified now)
           attr-doc (map->doc timestamped-attrs)
@@ -82,7 +82,7 @@
                                             {$set attr-doc}
                                             {:return-new true}))))
 
-  (delete! [{db :db} username]
+  (delete! [{db :database} username]
     (collection/remove db collection {:username username})))
 
 (defn mongo [config]
