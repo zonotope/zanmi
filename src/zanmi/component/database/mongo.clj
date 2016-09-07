@@ -11,36 +11,25 @@
             [monger.credentials :as credentials]
             [monger.operators :refer [$set]]))
 
+(def ^:private collection "profiles")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; key sanitization                                                         ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- transform-keys [m f & overrides]
-  (let [keymap (-> (into {} (map #(vector % (f %))) (keys m))
-                   (merge (apply array-map overrides)))]
-    (rename-keys m keymap)))
+(defn- transform-keys
+  ([m f]
+   (transform-keys m f {}))
+  ([m f overrides]
+   (let [keymap (-> (into {} (map #(vector % (f %))) (keys m))
+                    (merge overrides))]
+     (rename-keys m keymap))))
 
 (defn- map->doc [m]
-  (transform-keys m ->snake_case_keyword :id :_id))
+  (transform-keys m ->snake_case_keyword {:id :_id}))
 
 (defn- doc->map [d]
   (transform-keys d ->kebab-case-keyword))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; query utils                                                              ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def ^:private collection "profiles")
-
-(defn- execute [{db :db} cmd & args]
-  (let [mongo-args (->> args
-                        (map map->doc)
-                        (cons collection)
-                        (cons db))]
-    (apply cmd mongo-args)))
-
-(defn- execute-map [mongo cmd & args]
-  (doc->map (execute mongo cmd args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; component                                                                ;;
@@ -74,22 +63,23 @@
     (mongo/command db {:dropDatabase 1}))
 
   (fetch [{db :db} username]
-    (doc->map (collection/find-one-as-map db collection {:username username})))
+    (let [attr {:username username}]
+      (doc->map (collection/find-one-as-map db collection attr))))
 
   (create! [{db :db} attrs]
     (let [now (time/now)
-          timestamped-attrs (assoc attrs :created now :modified now)]
-      (->> timestamped-attrs
-           (map->doc)
-           (collection/insert-and-return db collection)
-           (doc->map))))
+          timestamped-attrs (assoc attrs :created now :modified now)
+          attrs-doc (map->doc timestamped-attrs)]
+      (doc->map (collection/insert-and-return db collection attrs-doc))))
 
   (update! [{db :db} username attrs]
     (let [now (time/now)
-          timestamped-attrs (assoc attrs :modified now)]
+          timestamped-attrs (assoc attrs :modified now)
+          attr-doc (map->doc timestamped-attrs)
+          query (map->doc {:username username})]
       (doc->map (collection/find-and-modify db collection
                                             {:username username}
-                                            {$set (map->doc timestamped-attrs)}
+                                            {$set attr-doc}
                                             {:return-new true}))))
 
   (delete! [{db :db} username]
