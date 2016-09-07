@@ -4,7 +4,6 @@
             [camel-snake-kebab.core :refer [->camelCaseKeyword
                                             ->kebab-case-keyword
                                             ->snake_case_keyword]]
-            [clojure.set :refer [rename-keys]]
             [com.stuartsierra.component :as component]
             [monger.core :as mongo]
             [monger.collection :as collection]
@@ -21,9 +20,9 @@
   ([m f]
    (transform-keys m f {}))
   ([m f overrides]
-   (let [keymap (-> (into {} (for [k (keys m)] [k (f k)]))
-                    (merge overrides))]
-     (rename-keys m keymap))))
+   (into {} (for [[k v] m]
+              (let [new-key (if-let [override (k overrides)] override (f k))]
+                [new-key v])))))
 
 (defn- map->doc [m]
   (transform-keys m ->snake_case_keyword {:id :_id}))
