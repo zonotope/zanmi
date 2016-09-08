@@ -6,20 +6,20 @@
   ^:displace {:http {:port 3000}})
 
 (def environ
-  {:db {:engine (env :db-engine)
-        :username (env :db-username)
-        :password (env :db-password)
-        :host (env :db-host)
-        :db-name (env :db-name)}
+  {:db {:engine (:db-engine env)
+        :username (:db-username env)
+        :password (:db-password env)
+        :host (:db-host env)
+        :db-name (:db-name env)}
 
    :http {:port (some-> env :port Integer.)}
 
-   :logger {:level (symbol (env :log-level))
-            :path (env :log-path)
-            :pattern (symbol (env :log-pattern))}
+   :logger {:level (some-> env :log-level symbol)
+            :path (:log-path env)
+            :pattern (some-> env :log-pattern symbol)}
 
-   :profile-repo {:username-length (env :username-length)
-                  :password-length (env :password-length)
-                  :password-score (env :password-score)}
+   :profile-repo {:username-length (:username-length env)
+                  :password-length (:password-length env)
+                  :password-score (:password-score env)}
 
-   :secret (env :secret)})
+   :secret (:secret env)})
