@@ -6,7 +6,7 @@
   ^:displace {:http {:port 3000}})
 
 (def environ
-  {:db {:engine (:db-engine env)
+  {:db {:engine (some-> env :db-engine symbol)
         :username (:db-username env)
         :password (:db-password env)
         :host (:db-host env)

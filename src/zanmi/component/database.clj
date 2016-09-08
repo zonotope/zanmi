@@ -4,5 +4,5 @@
 
 (defn database [config]
   (case (:engine config)
-    "postgres" (postgres config)
-    "mongo"    (mongo config)))
+    :postgres (postgres config)
+    :mongo    (mongo config)))
