@@ -6,11 +6,15 @@
   ^:displace {:http {:port 3000}})
 
 (def environ
-  {:http {:port (some-> env :port Integer.)}
-
-   :db {:server-name (env :database-host)
+  {:db {:server-name (env :database-host)
         :database-name (env :database-name)
         :password (env :database-password)}
+
+   :http {:port (some-> env :port Integer.)}
+
+   :logger {:level (symbol (env :log-level))
+            :path (env :log-path)
+            :pattern (symbol (env :log-pattern))}
 
    :profile-repo {:username-length (env :username-length)
                   :password-length (env :password-length)

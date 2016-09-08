@@ -24,13 +24,13 @@
 
    :http {:port 3000}
 
-   :profile-repo {:username-length 32
-                  :password-length 64
-                  :password-score 3}
-
    :logger {:level :info
             :path "log/zanmi.log"
             :pattern :daily}
+
+   :profile-repo {:username-length 32
+                  :password-length 64
+                  :password-score 3}
 
    :secret "nobody knows this!"})
 
