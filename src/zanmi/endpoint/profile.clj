@@ -2,6 +2,7 @@
   (:require [zanmi.data.profile :refer [authenticate create! delete! update!]]
             [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
+            [clojure.core.match :refer [match]]
             [compojure.core :refer [context DELETE GET POST PUT]]
             [ring.util.response :as response :refer [response]]))
 
@@ -50,11 +51,9 @@
   (fn [{:keys [profile-repo] :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
-        (let [result (create! profile-repo
-                              {:username username, :password password})]
-          (if-let [profile (:ok result)]
-            (created profile secret)
-            (error (:error result) 409))))
+        (match (create! profile-repo {:username username, :password password})
+          {:ok profile} (created profile secret)
+          {:error messages} (error messages 409)))
 
       (GET "/:username" [username password]
         (when-authenticated profile-repo username password
@@ -62,11 +61,11 @@
 
       (PUT "/:username" [username password new-password]
         (when-authenticated profile-repo username password
-                            (fn [_] (let [result (update! profile-repo
-                                                         username new-password)]
-                                     (if-let [new-profile (:ok result)]
-                                       (ok new-profile secret)
-                                       (error (:error result) 400))))))
+                            (fn [_]
+                              (match (update! profile-repo username
+                                              new-password)
+                                {:ok new-profile} (ok new-profile secret)
+                                {:error messages} (error messages 400)))))
 
       (DELETE "/:username" [username password]
         (when-authenticated profile-repo username password
