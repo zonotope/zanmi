@@ -35,7 +35,7 @@
   (response (render-token profile secret)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; auth                                                                     ;;
+;; auth/error handling                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- when-authenticated [profile-repo username password response-fn]
@@ -52,8 +52,8 @@
     (context route-prefix []
       (POST "/" [username password]
         (match (create! profile-repo {:username username, :password password})
-          {:ok profile} (created profile secret)
-          {:error messages} (error messages 409)))
+          [:ok profile] (created profile secret)
+          [:error messages] (error messages 409)))
 
       (GET "/:username" [username password]
         (when-authenticated profile-repo username password
@@ -64,8 +64,8 @@
                             (fn [_]
                               (match (update! profile-repo username
                                               new-password)
-                                {:ok new-profile} (ok new-profile secret)
-                                {:error messages} (error messages 400)))))
+                                [:ok new-profile] (ok new-profile secret)
+                                [:error messages] (error messages 400)))))
 
       (DELETE "/:username" [username password]
         (when-authenticated profile-repo username password

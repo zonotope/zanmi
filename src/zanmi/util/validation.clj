@@ -13,5 +13,5 @@
 (defn when-valid [data schema validated-fn]
   (let [[errors validated] (validate data schema)]
     (if errors
-      {:error errors}
-      {:ok (validated-fn validated)})))
+      [:error errors]
+      [:ok (validated-fn validated)])))
