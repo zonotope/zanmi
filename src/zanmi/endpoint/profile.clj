@@ -53,6 +53,7 @@
       (POST "/" [username password]
         (match (create! profile-repo {:username username, :password password})
           [:ok profile] (created profile secret)
+
           [:error messages] (error messages 409)))
 
       (GET "/:username" [username password]
@@ -61,13 +62,13 @@
 
       (PUT "/:username" [username password new-password]
         (when-authenticated profile-repo username password
-                            (fn [_]
-                              (match (update! profile-repo username
+                            (fn [profile]
+                              (match (update! profile-repo profile
                                               new-password)
                                 [:ok new-profile] (ok new-profile secret)
                                 [:error messages] (error messages 400)))))
 
       (DELETE "/:username" [username password]
         (when-authenticated profile-repo username password
-                            (fn [_] (when (delete! profile-repo username)
+                            (fn [profile] (when (delete! profile-repo profile)
                                      (deleted username))))))))

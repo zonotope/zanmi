@@ -35,7 +35,7 @@
                                     (hash-password)
                                     (database/create! db)))))
 
-(defn update! [{:keys [db schema]} username new-password]
+(defn update! [{:keys [db schema]} {:keys [username]} new-password]
   (let [attr {:password new-password}
         validator (select-keys schema [:password])]
     (when-valid attr validator
@@ -43,7 +43,7 @@
                                      (hash-password)
                                      (database/update! db username))))))
 
-(defn delete! [{db :db} username]
+(defn delete! [{db :db} {:keys [username]}]
   (database/delete! db username))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
