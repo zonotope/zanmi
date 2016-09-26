@@ -46,14 +46,9 @@
 (defn delete! [{db :db} {:keys [username]}]
   (database/delete! db username))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; auth                                                                     ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn authenticate [repo username password]
-  (let [{:keys [hashed-password] :as profile} (fetch repo username)]
-    (when (hash/check password hashed-password)
-      profile)))
+(defn authenticate [{:keys [hashed-password] :as profile} password]
+  (when (hash/check password hashed-password)
+    profile))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; password validation                                                      ;;

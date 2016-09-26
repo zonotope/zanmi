@@ -1,5 +1,6 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.data.profile :refer [authenticate create! delete! update!]]
+  (:require [zanmi.data.profile :refer [authenticate create! delete! fetch
+                                        update!]]
             [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
             [clojure.core.match :refer [match]]
@@ -14,6 +15,16 @@
 
 (defn- resource-url [{username :username :as profile}]
   (str route-prefix "/" username))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; auth                                                                     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- when-authenticated [profile-repo username password response-fn]
+  (if-let [profile (-> (fetch profile-repo username)
+                       (authenticate password))]
+    (response-fn profile)
+    (error "bad username or password" 401)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; responses                                                                ;;
@@ -33,15 +44,6 @@
 
 (defn- ok [profile secret]
   (response (render-token profile secret)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; auth/error handling                                                      ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn- when-authenticated [profile-repo username password response-fn]
-  (if-let [profile (authenticate profile-repo username password)]
-    (response-fn profile)
-    (error "bad username or password" 401)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; endpoint                                                                 ;;
