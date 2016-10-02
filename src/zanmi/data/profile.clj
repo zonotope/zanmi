@@ -21,47 +21,59 @@
   (let [id (uuid/v5 uuid/+namespace-url+ username)]
     (assoc attrs :id id)))
 
+(defn build [attrs]
+  (-> attrs
+      (with-id)
+      (hash-password)))
+
+(defn reset-password [profile new-password]
+  (-> profile
+      (dissoc :hashed-password)
+      (assoc :password new-password)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; crud                                                                     ;;
+;; auth                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn fetch [{db :db} username]
-  (database/fetch db username))
-
-(defn create! [{:keys [db schema]} {password :password :as attrs}]
-  (when-valid attrs schema
-              (fn [valid-attrs] (->> valid-attrs
-                                    (with-id)
-                                    (hash-password)
-                                    (database/create! db)))))
-
-(defn update! [{:keys [db schema]} {:keys [username]} new-password]
-  (let [attr {:password new-password}
-        validator (select-keys schema [:password])]
-    (when-valid attr validator
-                (fn [valid-attr] (->> valid-attr
-                                     (hash-password)
-                                     (database/update! db username))))))
-
-(defn delete! [{db :db} {:keys [username]}]
-  (database/delete! db username))
 
 (defn authenticate [{:keys [hashed-password] :as profile} password]
   (when (hash/check password hashed-password)
     profile))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; crud                                                                     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn create! [{:keys [db schema]} {password :password :as attrs}]
+  (when-valid attrs schema
+              (fn [valid-attrs]
+                (let [new-profile (build valid-attrs)]
+                  (database/create! db new-profile)))))
+
+(defn delete! [{db :db} {:keys [username]}]
+  (database/delete! db username))
+
+(defn fetch [{db :db} username]
+  (database/fetch db username))
+
+(defn update! [{:keys [db schema]} {:keys [username] :as profile} new-password]
+  (let [new-attrs (reset-password profile new-password)]
+    (when-valid new-attrs schema
+                (fn [valid-attrs]
+                  (let [update-attrs (-> (hash-password valid-attrs)
+                                         (select-keys [:hashed-password]))]
+                    (database/update! db username update-attrs))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; password validation                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvalidator min-password-score
-  {:message-fn (fn [path value]
-                 (let [{:keys [suggestions warning]} (:feedback
-                                                      (zxcvbn/check value))
-                       path-name (name (peek path))]
-                   (str "The " path-name " is too weak. "
-                        warning " "
-                        (string/join " " suggestions))))}
+(defn- password-error-message [path value]
+  (let [{:keys [suggestions warning]} (:feedback (zxcvbn/check value))
+        path-name (name (peek path))]
+    (str "The " path-name " is too weak. "
+         warning " " (string/join " " suggestions))))
+
+(defvalidator min-password-score {:message-fn password-error-message}
   [password strength]
   (>= (:score (zxcvbn/check password))
       strength))

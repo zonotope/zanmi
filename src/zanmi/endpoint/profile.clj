@@ -17,16 +17,6 @@
   (str route-prefix "/" username))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; auth                                                                     ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn- when-authenticated [profile-repo username password response-fn]
-  (if-let [profile (-> (fetch profile-repo username)
-                       (authenticate password))]
-    (response-fn profile)
-    (error "bad username or password" 401)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; responses                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -44,6 +34,16 @@
 
 (defn- ok [profile secret]
   (response (render-token profile secret)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; auth                                                                     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- when-authenticated [profile-repo username password response-fn]
+  (if-let [profile (-> (fetch profile-repo username)
+                       (authenticate password))]
+    (response-fn profile)
+    (error "bad username or password" 401)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; endpoint                                                                 ;;
@@ -71,4 +71,4 @@
       (DELETE "/:username" [username password]
         (when-authenticated profile-repo username password
                             (fn [profile] (when (delete! profile-repo profile)
-                                     (deleted username))))))))
+                                           (deleted username))))))))
