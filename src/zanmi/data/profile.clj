@@ -43,11 +43,10 @@
 ;; crud                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn create! [{:keys [db schema]} {password :password :as attrs}]
-  (when-valid attrs schema
-              (fn [valid-attrs]
-                (let [new-profile (build valid-attrs)]
-                  (database/create! db new-profile)))))
+(defn create! [{:keys [db schema]} attrs]
+  (let [validated (when-valid attrs schema
+                              (fn [valid-attrs] (build valid-attrs)))]
+      (database/save! db validated)))
 
 (defn delete! [{db :db} {:keys [username]}]
   (database/delete! db username))
@@ -56,12 +55,12 @@
   (database/fetch db username))
 
 (defn update! [{:keys [db schema]} {:keys [username] :as profile} new-password]
-  (let [new-attrs (reset-password profile new-password)]
-    (when-valid new-attrs schema
-                (fn [valid-attrs]
-                  (let [update-attrs (-> (hash-password valid-attrs)
-                                         (select-keys [:hashed-password]))]
-                    (database/update! db username update-attrs))))))
+  (let [new-attrs (reset-password profile new-password)
+        validated (when-valid new-attrs schema
+                              (fn [valid-attrs]
+                                (-> (hash-password valid-attrs)
+                                    (select-keys [:hashed-password]))))]
+    (database/set! db username validated)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; password validation                                                      ;;
