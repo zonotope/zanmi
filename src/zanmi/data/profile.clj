@@ -12,19 +12,14 @@
 ;; attribute sanitzation                                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- hash-password [{:keys [password] :as attrs}]
-  (-> attrs
-      (dissoc :password)
-      (assoc :hashed-password (hash/derive password))))
-
-(defn- with-id [{:keys [username] :as attrs}]
+(defn with-id [{:keys [username] :as attrs}]
   (let [id (uuid/v5 uuid/+namespace-url+ username)]
     (assoc attrs :id id)))
 
-(defn build [attrs]
+(defn hash-password [{:keys [password] :as attrs}]
   (-> attrs
-      (with-id)
-      (hash-password)))
+      (dissoc :password)
+      (assoc :hashed-password (hash/derive password))))
 
 (defn reset-password [profile new-password]
   (-> profile
@@ -32,19 +27,13 @@
       (assoc :password new-password)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; auth                                                                     ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn authenticate [{:keys [hashed-password] :as profile} password]
-  (when (hash/check password hashed-password)
-    profile))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; crud                                                                     ;;
+;; crud/auth                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn create [schema attrs]
-  (when-valid attrs schema (fn [valid-attrs] (build valid-attrs))))
+  (let [create-attrs (with-id attrs)]
+    (when-valid create-attrs schema
+                (fn [valid-attrs] (hash-password valid-attrs)))))
 
 (defn create! [{:keys [db schema] :as repo} attrs]
   (let [validated (create schema attrs)]
@@ -57,14 +46,18 @@
   (database/fetch db username))
 
 (defn update [schema profile new-password]
-  (let [new-attrs (reset-password profile new-password)]
-    (when-valid new-attrs schema
+  (let [update-attrs (reset-password profile new-password)]
+    (when-valid update-attrs schema
                 (fn [valid-attrs] (-> (hash-password valid-attrs)
                                      (select-keys [:hashed-password]))))))
 
 (defn update! [{:keys [db schema]} {:keys [username] :as profile} new-password]
   (let [validated (update schema profile new-password)]
     (database/set! db username validated)))
+
+(defn authenticate [{:keys [hashed-password] :as profile} password]
+  (when (hash/check password hashed-password)
+    profile))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; password validation                                                      ;;
