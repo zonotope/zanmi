@@ -26,8 +26,13 @@
         (is (not (nil? profile))
             "returns the profile")
 
-        (is (not (nil? (:id profile)))
-            "includes an id")
+        (testing "id"
+          (let [id (:id profile)]
+            (is (not (nil? id))
+                "is included")
+
+            (is (uuid? id)
+                "is a uuid")))
 
         (is (nil? (:password profile))
             "doesn't include the raw password")
