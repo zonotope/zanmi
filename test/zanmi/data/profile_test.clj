@@ -47,5 +47,14 @@
 
 (deftest test-update
   (testing "update"
-    (testing "with a valid new password")
-    (testing "with an invalid new password")))
+    (let [profile (:ok (create schema {:username "tester"
+                                       :password "this is only a test"}))]
+      (testing "with a valid new password"
+        (let [updated (:ok (update schema profile "this really is a test"))]
+          (is (not (nil? profile))
+              "returns the profile")))
+
+      (testing "with an invalid new password"
+        (let [error (:error (update schema profile "p4$$w0rd"))]
+          (is (not (nil? error))
+              "returns an error"))))))
