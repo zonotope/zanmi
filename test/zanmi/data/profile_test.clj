@@ -35,7 +35,10 @@
         (is (not (nil? :hashed-password))
             "includes the hashed password")))
 
-    (testing "with invalid attributes")))
+    (testing "with invalid attributes"
+      (is (not (nil? (:error (create schema {:username "tester"
+                                             :password "p4$$w0rd"}))))
+          "returns an error"))))
 
 (deftest test-update
   (testing "update"
