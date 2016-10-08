@@ -1,6 +1,5 @@
 (ns zanmi.data.profile
-  (:require [zanmi.component.schema :refer [schema-component]]
-            [zanmi.util.validation :refer [when-valid]]
+  (:require [zanmi.util.validation :refer [when-valid]]
             [bouncer.validators :refer [defvalidator max-count required string]]
             [buddy.hashers :as hash]
             [clj-uuid :as uuid]
@@ -26,37 +25,23 @@
       (assoc :password new-password)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; crud/auth                                                                ;;
+;; profile processing                                                       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn authenticate [{:keys [hashed-password] :as profile} password]
+  (when (hash/check password hashed-password)
+    profile))
 
 (defn create [schema attrs]
   (let [create-attrs (with-id attrs)]
     (when-valid create-attrs schema
                 (fn [valid-attrs] (hash-password valid-attrs)))))
 
-(defn create! [{:keys [db schema] :as schema} attrs]
-  (let [validated (create schema attrs)]
-    (database/save! db validated)))
-
-(defn delete! [{db :db} {:keys [username]}]
-  (database/delete! db username))
-
-(defn fetch [{db :db} username]
-  (database/fetch db username))
-
 (defn update [schema profile new-password]
   (let [update-attrs (reset-password profile new-password)]
     (when-valid update-attrs schema
                 (fn [valid-attrs] (-> (hash-password valid-attrs)
                                      (select-keys [:hashed-password]))))))
-
-(defn update! [{:keys [db schema]} {:keys [username] :as profile} new-password]
-  (let [validated (update schema profile new-password)]
-    (database/set! db username validated)))
-
-(defn authenticate [{:keys [hashed-password] :as profile} password]
-  (when (hash/check password hashed-password)
-    profile))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; password validation                                                      ;;
@@ -74,17 +59,15 @@
       strength))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; data schema                                                                ;;
+;; data schema                                                              ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-schema [{:keys [username-length password-length password-score]}]
-  (let [schema {:username [required
-                           string
-                           [max-count username-length]]
+  {:username [required
+              string
+              [max-count username-length]]
 
-                :password [required
-                           string
-                           [max-count password-length]
-                           [min-password-score password-score]]}]
-
-    (schema-component schema)))
+   :password [required
+              string
+              [max-count password-length]
+              [min-password-score password-score]]})

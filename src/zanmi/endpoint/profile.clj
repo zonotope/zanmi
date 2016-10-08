@@ -1,7 +1,6 @@
 (ns zanmi.endpoint.profile
   (:require [zanmi.boundary.database :as db]
-            [zanmi.data.profile :refer [authenticate create! delete! fetch
-                                        update!]]
+            [zanmi.data.profile :refer [authenticate create update]]
             [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
             [clojure.core.match :refer [match]]
@@ -54,9 +53,12 @@
   (fn [{:keys [db profile-schema] :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
-        (-> (create profile-schema {:username username, :password password})
-            (match {:ok profile} (created profile secret)
-                   {:error messages} (error messages 409))))
+        (as-> (create profile-schema {:username username :password password})
+            validated
+          (db/save! db validated)
+          (match validated
+            {:ok profile} (created profile secret)
+            {:error messages} (error messages 409))))
 
       (GET "/:username" [username password]
         (when-authenticated db username password
@@ -64,10 +66,13 @@
 
       (PUT "/:username" [username password new-password]
         (when-authenticated db username password
-                            (fn [profile]
-                              (-> (update! profile-schema profile new-password)
-                                  (match {:ok new-profile} (ok new-profile secret)
-                                         {:error messages} (error messages 400))))))
+                            (fn [{:keys [username] :as profile}]
+                              (as-> (update profile-schema profile new-password)
+                                  validated
+                                (db/set! db username validated)
+                                (match validated
+                                  {:ok new-profile} (ok new-profile secret)
+                                  {:error messages} (error messages 400))))))
 
       (DELETE "/:username" [username password]
         (when-authenticated db username password

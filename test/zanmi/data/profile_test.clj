@@ -3,7 +3,7 @@
             [zanmi.test-config :refer [config]]
             [clojure.test :refer :all]))
 
-(let [schema (:schema (profile-schema (:profile-schema config)))]
+(let [schema (profile-schema (:profile-schema config))]
 
   (deftest test-authenticate
     (testing "authenticate"
