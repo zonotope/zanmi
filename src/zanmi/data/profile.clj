@@ -12,16 +12,16 @@
 ;; attribute sanitzation                                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn with-id [{:keys [username] :as attrs}]
+(defn- with-id [{:keys [username] :as attrs}]
   (let [id (uuid/v5 uuid/+namespace-url+ username)]
     (assoc attrs :id id)))
 
-(defn hash-password [{:keys [password] :as attrs}]
+(defn- hash-password [{:keys [password] :as attrs}]
   (-> attrs
       (dissoc :password)
       (assoc :hashed-password (hash/derive password))))
 
-(defn reset-password [profile new-password]
+(defn- reset-password [profile new-password]
   (-> profile
       (dissoc :hashed-password)
       (assoc :password new-password)))

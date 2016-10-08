@@ -7,8 +7,8 @@
 
   (deftest test-authenticate
     (testing "authenticate"
-      (let [profile (hash-password (with-id {:username "test-user"
-                                             :password "correct"}))]
+      (let [profile (:ok (create schema {:username "tester",
+                                         :password "correct"}))]
         (testing "with the correct password"
           (is (= (authenticate profile "correct")
                  profile)
