@@ -28,7 +28,7 @@
             :path "log/zanmi.log"
             :pattern :daily}
 
-   :profile-repo {:username-length 32
+   :profile-schema {:username-length 32
                   :password-length 64
                   :password-score 3}
 

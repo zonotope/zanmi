@@ -18,7 +18,7 @@
             :path (:log-path env)
             :pattern (some-> env :log-pattern symbol)}
 
-   :profile-repo {:username-length (some-> env :username-length Integer.)
+   :profile-schema {:username-length (some-> env :username-length Integer.)
                   :password-length (some-> env :password-length Integer.)
                   :password-score (some-> env :password-score Integer.)}
 

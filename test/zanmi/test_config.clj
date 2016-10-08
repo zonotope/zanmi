@@ -7,8 +7,8 @@
         :host "localhost"
         :db-name "zanmi_test"}
 
-   :profile-repo {:username-length 32
-                  :password-length 64
-                  :password-score 1}
+   :profile-schema {:username-length 32
+                    :password-length 64
+                    :password-score 1}
 
    :secret "nobody knows this!"})

@@ -1,6 +1,5 @@
 (ns zanmi.data.profile
-  (:require [zanmi.boundary.database :as database]
-            [zanmi.component.repo :refer [repo-component]]
+  (:require [zanmi.component.schema :refer [schema-component]]
             [zanmi.util.validation :refer [when-valid]]
             [bouncer.validators :refer [defvalidator max-count required string]]
             [buddy.hashers :as hash]
@@ -35,7 +34,7 @@
     (when-valid create-attrs schema
                 (fn [valid-attrs] (hash-password valid-attrs)))))
 
-(defn create! [{:keys [db schema] :as repo} attrs]
+(defn create! [{:keys [db schema] :as schema} attrs]
   (let [validated (create schema attrs)]
     (database/save! db validated)))
 
@@ -75,10 +74,10 @@
       strength))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; data repo                                                                ;;
+;; data schema                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn profile-repo [{:keys [username-length password-length password-score]}]
+(defn profile-schema [{:keys [username-length password-length password-score]}]
   (let [schema {:username [required
                            string
                            [max-count username-length]]
@@ -88,4 +87,4 @@
                            [max-count password-length]
                            [min-password-score password-score]]}]
 
-    (repo-component schema)))
+    (schema-component schema)))

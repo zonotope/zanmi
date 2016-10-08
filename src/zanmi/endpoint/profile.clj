@@ -1,5 +1,6 @@
 (ns zanmi.endpoint.profile
-  (:require [zanmi.data.profile :refer [authenticate create! delete! fetch
+  (:require [zanmi.boundary.database :as db]
+            [zanmi.data.profile :refer [authenticate create! delete! fetch
                                         update!]]
             [zanmi.view.profile :refer [render-error render-message
                                         render-token]]
@@ -39,8 +40,8 @@
 ;; auth                                                                     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-authenticated [profile-repo username password response-fn]
-  (if-let [profile (-> (fetch profile-repo username)
+(defn- when-authenticated [db username password response-fn]
+  (if-let [profile (-> (db/fetch db username)
                        (authenticate password))]
     (response-fn profile)
     (error "bad username or password" 401)))
@@ -50,25 +51,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-endpoint [secret]
-  (fn [{:keys [profile-repo] :as endpoint}]
+  (fn [{:keys [db profile-schema] :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
-        (-> (create! profile-repo {:username username, :password password})
+        (-> (create profile-schema {:username username, :password password})
             (match {:ok profile} (created profile secret)
                    {:error messages} (error messages 409))))
 
       (GET "/:username" [username password]
-        (when-authenticated profile-repo username password
+        (when-authenticated db username password
                             (fn [profile] (ok profile secret))))
 
       (PUT "/:username" [username password new-password]
-        (when-authenticated profile-repo username password
+        (when-authenticated db username password
                             (fn [profile]
-                              (-> (update! profile-repo profile new-password)
+                              (-> (update! profile-schema profile new-password)
                                   (match {:ok new-profile} (ok new-profile secret)
                                          {:error messages} (error messages 400))))))
 
       (DELETE "/:username" [username password]
-        (when-authenticated profile-repo username password
-                            (fn [profile] (when (delete! profile-repo profile)
+        (when-authenticated db username password
+                            (fn [profile] (when (db/delete! db profile)
                                            (deleted username))))))))
