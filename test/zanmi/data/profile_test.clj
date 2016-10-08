@@ -6,9 +6,9 @@
 (def schema (:schema (profile-repo (:profile-repo config))))
 
 (deftest test-authenticate
-  (let [profile (hash-password (with-id {:username "test-user"
-                                         :password "correct"}))]
-    (testing "authenticate"
+  (testing "authenticate"
+    (let [profile (hash-password (with-id {:username "test-user"
+                                           :password "correct"}))]
       (testing "with the correct password"
         (is (= (authenticate profile "correct")
                profile)
@@ -55,8 +55,14 @@
                                        :password "this is only a test"}))]
       (testing "with a valid new password"
         (let [updated (:ok (update schema profile "this really is a test"))]
-          (is (not (nil? profile))
-              "returns the profile")))
+          (is (not (nil? updated))
+              "returns the profile")
+
+          (is (nil? (:username updated))
+              "doesn't include the username")
+
+          (is (not (= (:hashed-password profile) (:hashed-pasword updated)))
+              "includes a different hashed password")))
 
       (testing "with an invalid new password"
         (let [error (:error (update schema profile "p4$$w0rd"))]
