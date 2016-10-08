@@ -41,9 +41,13 @@
             "includes the hashed password")))
 
     (testing "with invalid attributes"
-      (is (not (nil? (:error (create schema {:username "tester"
-                                             :password "p4$$w0rd"}))))
-          "returns an error"))))
+      (let [{profile :ok error :error} (create schema {:username "tester"
+                                                       :password "p4$$w0rd"})]
+        (is (not (nil? error))
+            "returns an error")
+
+        (is (nil? profile)
+            "does not return the profile")))))
 
 (deftest test-update
   (testing "update"
