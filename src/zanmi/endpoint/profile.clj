@@ -54,8 +54,8 @@
     (context route-prefix []
       (POST "/" [username password]
         (-> (create! profile-repo {:username username, :password password})
-            (match [:ok profile] (created profile secret)
-                   [:error messages] (error messages 409))))
+            (match {:ok profile} (created profile secret)
+                   {:error messages} (error messages 409))))
 
       (GET "/:username" [username password]
         (when-authenticated profile-repo username password
@@ -65,8 +65,8 @@
         (when-authenticated profile-repo username password
                             (fn [profile]
                               (-> (update! profile-repo profile new-password)
-                                  (match [:ok new-profile] (ok new-profile secret)
-                                         [:error messages] (error messages 400))))))
+                                  (match {:ok new-profile} (ok new-profile secret)
+                                         {:error messages} (error messages 400))))))
 
       (DELETE "/:username" [username password]
         (when-authenticated profile-repo username password

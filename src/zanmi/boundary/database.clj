@@ -18,12 +18,12 @@
 
 (defn save! [db validated]
   (match validated
-    [:ok new-profile] (try [:ok (create! db new-profile)]
-                           (catch Exception e [:error (.getMessage e)]))
+    {:ok new-profile} (try {:ok (create! db new-profile)}
+                           (catch Exception e {:error (.getMessage e)}))
     :else validated))
 
 (defn set! [db username validated]
   (match validated
-    [:ok attrs] (try [:ok (update! db username attrs)]
-                     (catch Exception e [:error (.getMessage e)]))
+    {:ok attrs} (try {:ok (update! db username attrs)}
+                     (catch Exception e {:error (.getMessage e)}))
     :else validated))
