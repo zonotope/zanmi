@@ -1,6 +1,5 @@
 (ns zanmi.component.database.mongo
   (:require [zanmi.boundary.database :as database]
-            [zanmi.util.time :as time]
             [camel-snake-kebab.core :refer [->camelCaseKeyword
                                             ->kebab-case-keyword
                                             ->snake_case_keyword]]
@@ -66,15 +65,11 @@
       (doc->map (collection/find-one-as-map db collection attr))))
 
   (create! [{db :database} attrs]
-    (let [now (time/now)
-          timestamped-attrs (assoc attrs :created now :modified now)
-          attrs-doc (map->doc timestamped-attrs)]
+    (let [attrs-doc (map->doc attrs)]
       (doc->map (collection/insert-and-return db collection attrs-doc))))
 
   (update! [{db :database} username attrs]
-    (let [now (time/now)
-          timestamped-attrs (assoc attrs :modified now)
-          attr-doc (map->doc timestamped-attrs)
+    (let [attr-doc (map->doc attrs)
           query (map->doc {:username username})]
       (doc->map (collection/find-and-modify db collection
                                             {:username username}

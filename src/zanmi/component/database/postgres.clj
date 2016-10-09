@@ -11,7 +11,8 @@
             [honeysql.helpers :as sql-helper :refer [defhelper delete-from
                                                      from insert-into select
                                                      sset update values where]]
-            [jdbc.core :as jdbc]))
+            [jdbc.core :as jdbc]
+            [jdbc.proto :as proto]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; db connection specs                                                      ;;
@@ -49,30 +50,25 @@
                               "  id UUID PRIMARY KEY NOT NULL,"
                               "  username VARCHAR(" length ") NOT NULL UNIQUE,"
                               "  hashed_password VARCHAR(128) NOT NULL,"
-                              "  created TIMESTAMP WITHOUT TIME ZONE"
-                              "          DEFAULT (now() at time zone 'utc'),"
-                              "  modified TIMESTAMP WITHOUT TIME ZONE"
-                              "           DEFAULT (now() at time zone 'utc')"
+                              "  created TIMESTAMP NOT NULL,"
+                              "  modified TIMESTAMP NOT NULL"
                               ")")))))
-
-(defn- set-modified-trigger! [db]
-  (with-open [conn (jdbc/connection (make-connection-spec db))]
-    (jdbc/execute conn (str "CREATE OR REPLACE FUNCTION update_modified() "
-                            "RETURNS TRIGGER AS $$ "
-                            "BEGIN "
-                            "  NEW.modified = (now() at time zone 'utc'); "
-                            "  RETURN NEW; "
-                            "END; "
-                            "$$ language 'plpgsql';"))
-
-    (jdbc/execute conn (str "CREATE TRIGGER update_" (name table) "_modified "
-                            "BEFORE UPDATE ON " (name table) " "
-                            "FOR EACH ROW EXECUTE PROCEDURE "
-                            "  update_modified();"))))
 
 (defn- drop-database! [{:keys [database-name] :as db}]
   (with-open [conn (jdbc/connection (postgres-db-spec db))]
     (jdbc/execute conn (str "DROP DATABASE " database-name))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; time conversion                                                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(extend-protocol proto/ISQLType
+  java.util.Date
+  (as-sql-type [date conn]
+    (java.sql.Timestamp. (.getTime date)))
+
+  (set-stmt-parameter! [date conn stmt index]
+    (.setObject stmt index (proto/as-sql-type date conn))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; querying                                                                 ;;
@@ -122,8 +118,7 @@
   database/Database
   (initialize! [db]
     (create-database! db)
-    (create-table! db)
-    (set-modified-trigger! db))
+    (create-table! db))
 
   (destroy! [db]
     (drop-database! db))

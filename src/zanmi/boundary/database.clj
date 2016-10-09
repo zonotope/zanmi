@@ -1,5 +1,6 @@
 (ns zanmi.boundary.database
-  (require [clojure.core.match :refer [match]]))
+  (require [zanmi.util.time :as time]
+           [clojure.core.match :refer [match]]))
 
 (defprotocol Database
   "Interact with a database"
@@ -18,12 +19,18 @@
 
 (defn save! [db validated]
   (match validated
-    {:ok new-profile} (try {:ok (create! db new-profile)}
+    {:ok new-profile} (try (let [now (time/now)]
+                             {:ok (-> new-profile
+                                      (assoc :created now, :modified now)
+                                      (as-> created (create! db created)))})
                            (catch Exception e {:error (.getMessage e)}))
     :else validated))
 
 (defn set! [db username validated]
   (match validated
-    {:ok attrs} (try {:ok (update! db username attrs)}
+    {:ok attrs} (try (let [now (time/now)]
+                       {:ok (-> attrs
+                                (assoc :modified now)
+                                (as-> updated (update! db username updated)))})
                      (catch Exception e {:error (.getMessage e)}))
     :else validated))
