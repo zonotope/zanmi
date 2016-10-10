@@ -53,12 +53,10 @@
   (fn [{:keys [db profile-schema] :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
-        (as-> (create profile-schema {:username username :password password})
-            validated
-          (db/save! db validated)
-          (match validated
-            {:ok profile} (created profile secret)
-            {:error messages} (error messages 409))))
+        (-> (create profile-schema {:username username :password password})
+            (as-> validated (db/save! db validated))
+            (match {:ok new-profile} (created new-profile secret)
+                   {:error messages} (error messages 409))))
 
       (GET "/:username" [username password]
         (when-authenticated db username password
@@ -67,12 +65,10 @@
       (PUT "/:username" [username password new-password]
         (when-authenticated db username password
                             (fn [{:keys [username] :as profile}]
-                              (as-> (update profile-schema profile new-password)
-                                  validated
-                                (db/set! db username validated)
-                                (match validated
-                                  {:ok new-profile} (ok new-profile secret)
-                                  {:error messages} (error messages 400))))))
+                              (-> (update profile-schema profile new-password)
+                                  (as-> validated (db/set! db username validated))
+                                  (match {:ok new-profile} (ok new-profile secret)
+                                         {:error messages} (error messages 400))))))
 
       (DELETE "/:username" [username password]
         (when-authenticated db username password
