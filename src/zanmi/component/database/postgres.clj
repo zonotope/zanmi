@@ -7,12 +7,12 @@
             [com.stuartsierra.component :as component]
             [hikari-cp.core :refer [make-datasource close-datasource]]
             [honeysql.core :as sql]
-            [honeysql.format :as fmt]
+            [honeysql.format :as sql.fmt]
             [honeysql.helpers :as sql-helper :refer [defhelper delete-from
                                                      from insert-into select
                                                      sset update values where]]
             [jdbc.core :as jdbc]
-            [jdbc.proto :as proto]))
+            [jdbc.proto]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; db connection specs                                                      ;;
@@ -59,23 +59,23 @@
     (jdbc/execute conn (str "DROP DATABASE " database-name))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; time conversion                                                          ;;
+;; sql time conversion                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(extend-protocol proto/ISQLType
+(extend-protocol jdbc.proto/ISQLType
   java.util.Date
   (as-sql-type [date conn]
     (java.sql.Timestamp. (.getTime date)))
 
   (set-stmt-parameter! [date conn stmt index]
-    (.setObject stmt index (proto/as-sql-type date conn))))
+    (.setObject stmt index (jdbc.proto/as-sql-type date conn))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; querying                                                                 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod fmt/format-clause :returning [[_ fields] _]
-  (str "RETURNING " (join ", " (map fmt/to-sql fields))))
+(defmethod sql.fmt/format-clause :returning [[_ fields] _]
+  (str "RETURNING " (join ", " (map sql.fmt/to-sql fields))))
 
 (defhelper returning [m args]
   (assoc m :returning args))
