@@ -22,15 +22,13 @@
         :host "localhost"
         :db-name "zanmi_dev"}
 
-   :http {:port 3000}
-
    :logger {:level :info
             :path "log/zanmi.log"
             :pattern :daily}
 
    :profile-schema {:username-length 32
-                  :password-length 64
-                  :password-score 3}
+                    :password-length 64
+                    :password-score 3}
 
    :secret "nobody knows this!"})
 
