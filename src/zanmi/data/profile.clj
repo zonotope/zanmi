@@ -2,7 +2,6 @@
   (:require [zanmi.util.validation :refer [when-valid]]
             [bouncer.validators :refer [defvalidator max-count required string]]
             [buddy.hashers :as hash]
-            [clj-uuid :as uuid]
             [clojure.string :as string]
             [zxcvbn.core :as zxcvbn]))
 
@@ -11,7 +10,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- with-id [{:keys [username] :as attrs}]
-  (let [id (uuid/v5 uuid/+namespace-url+ username)]
+  (let [id (java.util.UUID/randomUUID)]
     (assoc attrs :id id)))
 
 (defn- hash-password [{:keys [password] :as attrs}]

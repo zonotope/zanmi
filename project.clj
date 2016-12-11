@@ -14,7 +14,6 @@
 
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
-                 [danlentz/clj-uuid "0.1.6"]
                  [zxcvbn-clj "0.1.0-SNAPSHOT"]
 
                  [funcool/clojure.jdbc "0.9.0"]

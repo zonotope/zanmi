@@ -2,11 +2,10 @@
   (require [zanmi.boundary.database :as db]
            [zanmi.util.time :as time]
            [clojure.test :refer :all]
-           [clj-uuid :as uuid]
            [shrubbery.core :as shrubbery :refer [mock received?]]))
 
 (let [now (time/now)
-      profile {:id (uuid/null), :username "tester",
+      profile {:id (java.util.UUID/randomUUID), :username "tester",
                :hashed-password "corned beef", :created now, :modified now}]
 
   (deftest save!-test

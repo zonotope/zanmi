@@ -4,14 +4,13 @@
             [zanmi.util.time :as time]
             [zanmi.view.profile :refer :all]
             [buddy.sign.jwt :as jwt]
-            [clj-uuid :as uuid]
             [clojure.test :refer :all]))
 
 (deftest render-token-test
   (testing "render-token"
     (let [now (time/now)
           profile {:username "tester", :hashed-password "a long hash",
-                   :id (uuid/null), :created now, :modified now}
+                   :id (java.util.UUID/randomUUID), :created now, :modified now}
           secret "nobody knows this!"
           subject (:token (render-token profile secret))]
       (is (not (nil? subject))
