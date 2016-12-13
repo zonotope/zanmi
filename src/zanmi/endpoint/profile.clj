@@ -72,5 +72,5 @@
 
       (DELETE "/:username" [username password]
         (when-authenticated db username password
-                            (fn [profile] (when (db/delete! db profile)
+                            (fn [profile] (when (db/delete! db username)
                                            (deleted username))))))))
