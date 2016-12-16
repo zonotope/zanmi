@@ -86,16 +86,18 @@
     (rename-keys m keymap)))
 
 (defn- query-one [db-spec statement]
-  (->> statement
-       (sql/format)
-       (jdbc/fetch db-spec)
-       (first)
-       (sanitize-keys)))
+  (with-open [conn (jdbc/connection db-spec)]
+    (->> statement
+         (sql/format)
+         (jdbc/fetch conn)
+         (first)
+         (sanitize-keys))))
 
 (defn- execute [db-spec statement]
-  (->> statement
-       (sql/format)
-       (jdbc/execute db-spec)))
+  (with-open [conn (jdbc/connection db-spec)]
+    (->> statement
+         (sql/format)
+         (jdbc/execute conn))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; component                                                                ;;
