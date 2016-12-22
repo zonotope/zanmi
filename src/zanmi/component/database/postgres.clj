@@ -18,10 +18,10 @@
 ;; db connection specs                                                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- make-pooled-spec [postgres]
+(defn- pooled-spec [postgres]
   {:datasource (make-datasource postgres)})
 
-(defn- make-connection-spec [{:keys [username password server-name
+(defn- connection-spec [{:keys [username password server-name
                                      database-name]
                               :as db}]
   (let [subname (str "//" server-name "/" database-name)]
@@ -31,7 +31,7 @@
      :password password}))
 
 (defn- postgres-db-spec [db]
-  (make-connection-spec (assoc db :database-name "postgres")))
+  (connection-spec (assoc db :database-name "postgres")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ddl                                                                      ;;
@@ -44,7 +44,7 @@
     (jdbc/execute conn (str "CREATE DATABASE " database-name))))
 
 (defn- create-table! [db]
-  (with-open [conn (jdbc/connection (make-connection-spec db))]
+  (with-open [conn (jdbc/connection (connection-spec db))]
     (let [length 32]
       (jdbc/execute conn (str "CREATE TABLE " (name table) " ("
                               "  id UUID PRIMARY KEY NOT NULL,"
@@ -108,8 +108,7 @@
   (start [postgres]
     (if (:spec postgres)
       postgres
-      (assoc postgres
-             :spec (make-pooled-spec postgres))))
+      (assoc postgres :spec (pooled-spec postgres))))
 
   (stop [postgres]
     (if-let [datasource (-> postgres :spec :datasource)]
