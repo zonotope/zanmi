@@ -1,4 +1,4 @@
-(ns zanmi.view.profile
+(ns zanmi.view.profile-view
   (:require [buddy.sign.jwt :as jwt]))
 
 (defn- sign [profile secret]

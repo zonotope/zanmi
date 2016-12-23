@@ -1,8 +1,8 @@
 (ns zanmi.endpoint.profile-endpoint
   (:require [zanmi.boundary.database :as db]
             [zanmi.data.profile :refer [authenticate create update]]
-            [zanmi.view.profile :refer [render-error render-message
-                                        render-token]]
+            [zanmi.view.profile-view :refer [render-error render-message
+                                             render-token]]
             [clojure.core.match :refer [match]]
             [compojure.core :refer [context DELETE GET POST PUT]]
             [ring.util.response :as response :refer [response]]))

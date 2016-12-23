@@ -1,8 +1,8 @@
-(ns zanmi.view.profile-test
+(ns zanmi.view.profile-view-test
   (:require [zanmi.data.profile :refer [create]]
             [zanmi.test-config :refer [config]]
             [zanmi.util.time :as time]
-            [zanmi.view.profile :refer :all]
+            [zanmi.view.profile-view :refer :all]
             [buddy.sign.jwt :as jwt]
             [clojure.test :refer :all]))
 
