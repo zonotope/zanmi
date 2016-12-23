@@ -2,7 +2,7 @@
   (:require [zanmi.component.database :refer [database]]
             [zanmi.component.logger :refer [timbre]]
             [zanmi.data.profile :refer [profile-schema]]
-            [zanmi.endpoint.profile :refer [profile-endpoint]]
+            [zanmi.endpoint.profile :refer [profile-routes]]
             [zanmi.util.middleware :refer [wrap-format wrap-logger]]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
@@ -36,7 +36,7 @@
          :http             (jetty-server (:http config))
          :logger           (timbre (:logger config))
          :profile-endpoint (endpoint-component
-                            (profile-endpoint (:secret config)))
+                            (profile-routes (:secret config)))
          :profile-schema   (profile-schema (:profile-schema config)))
 
         (component/system-using

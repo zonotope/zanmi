@@ -46,10 +46,10 @@
     (error "bad username or password" 401)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; endpoint                                                                 ;;
+;; endpoint routes                                                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn profile-endpoint [secret]
+(defn profile-routes [secret]
   (fn [{:keys [db profile-schema] :as endpoint}]
     (context route-prefix []
       (POST "/" [username password]
