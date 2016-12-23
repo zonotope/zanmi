@@ -23,4 +23,6 @@
                     :password-length (some-> env :password-length Integer.)
                     :password-score (some-> env :password-score Integer.)}
 
-   :secret (:secret env)})
+   :secret (:secret env)
+
+   :app-key (:app-key env)})

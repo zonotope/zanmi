@@ -30,7 +30,9 @@
                     :password-length 64
                     :password-score 3}
 
-   :secret "nobody knows this!"})
+   :secret "nobody knows this!"
+
+   :app-key "unlock this door!"})
 
 (def config
   (meta-merge config/defaults
