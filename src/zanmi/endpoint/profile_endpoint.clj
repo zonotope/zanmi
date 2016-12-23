@@ -1,4 +1,4 @@
-(ns zanmi.endpoint.profile
+(ns zanmi.endpoint.profile-endpoint
   (:require [zanmi.boundary.database :as db]
             [zanmi.data.profile :refer [authenticate create update]]
             [zanmi.view.profile :refer [render-error render-message
