@@ -4,7 +4,7 @@
             [zanmi.view.profile-view :refer [render-error render-message
                                              render-token]]
             [clojure.core.match :refer [match]]
-            [compojure.core :refer [context DELETE GET POST PUT]]
+            [compojure.core :refer [context DELETE POST PUT]]
             [ring.util.response :as response :refer [response]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -59,7 +59,7 @@
                    {:error messages} (error messages 409))))
 
       (context "/:username" [username]
-        (GET "/" [password]
+        (POST "/auth" [password]
           (when-authenticated db username password
                               (fn [profile] (ok profile secret))))
 
