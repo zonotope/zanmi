@@ -58,20 +58,21 @@
             (match {:ok new-profile} (created new-profile secret)
                    {:error messages} (error messages 409))))
 
-      (GET "/:username" [username password]
-        (when-authenticated db username password
-                            (fn [profile] (ok profile secret))))
+      (context "/:username" [username]
+        (GET "/" [password]
+          (when-authenticated db username password
+                              (fn [profile] (ok profile secret))))
 
-      (PUT "/:username" [username password new-password]
-        (when-authenticated db username password
-                            (fn [{:keys [username] :as profile}]
-                              (-> (update profile-schema profile new-password)
-                                  (as-> validated (db/set! db username validated))
-                                  (match {:ok new-profile} (ok new-profile secret)
-                                         {:error messages} (error messages 400))))))
+        (PUT "/" [password new-password]
+          (when-authenticated db username password
+                              (fn [{:keys [username] :as profile}]
+                                (-> (update profile-schema profile new-password)
+                                    (as-> validated (db/set! db username validated))
+                                    (match {:ok new-profile} (ok new-profile secret)
+                                           {:error messages} (error messages 400))))))
 
-      (DELETE "/:username" [username password]
-        (when-authenticated db username password
-                            (fn [{:keys [username] :as profile}]
-                              (when (db/delete! db username)
-                                (deleted username))))))))
+        (DELETE "/" [password]
+          (when-authenticated db username password
+                              (fn [{:keys [username] :as profile}]
+                                (when (db/delete! db username)
+                                  (deleted username)))))))))
