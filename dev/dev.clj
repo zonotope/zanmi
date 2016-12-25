@@ -32,7 +32,7 @@
 
    :secret "nobody knows this!"
 
-   :app-key "unlock this door!"})
+   :api-key "unlock this door!"})
 
 (def config
   (meta-merge config/defaults

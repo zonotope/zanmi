@@ -25,4 +25,4 @@
 
    :secret (:secret env)
 
-   :app-key (:app-key env)})
+   :api-key (:api-key env)})
