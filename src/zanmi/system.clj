@@ -37,8 +37,7 @@
          :http             (jetty-server (:http config))
          :keypair          (keypair (:keypair config))
          :logger           (timbre (:logger config))
-         :profile-endpoint (endpoint-component
-                            (profile-routes (:secret config)))
+         :profile-endpoint (endpoint-component profile-routes)
          :profile-schema   (profile-schema (:profile-schema config)))
 
         (component/system-using

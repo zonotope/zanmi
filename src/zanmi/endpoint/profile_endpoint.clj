@@ -49,8 +49,8 @@
 ;; endpoint routes                                                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn profile-routes [secret]
-  (fn [{:keys [db profile-schema] :as endpoint}]
+(defn profile-routes [{:keys [db keypair profile-schema] :as endpoint}]
+  (let [secret (:private keypair)]
     (context route-prefix []
       (POST "/" [username password]
         (-> (create profile-schema {:username username :password password})

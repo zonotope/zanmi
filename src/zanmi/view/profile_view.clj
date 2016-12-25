@@ -4,7 +4,7 @@
 (defn- sign [profile secret]
   (-> profile
       (select-keys [:id :username :modified])
-      (jwt/sign secret)))
+      (jwt/sign secret {:alg :ps512})))
 
 (defn render-token [profile secret]
   {:token (sign profile secret)})
