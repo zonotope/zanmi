@@ -32,6 +32,9 @@
 
    :secret "nobody knows this!"
 
+   :keypair {:public  "dev/resources/keypair/pub.pem"
+             :private "dev/resources/keypair/priv.pem"}
+
    :api-key "unlock this door!"})
 
 (def config

@@ -11,3 +11,4 @@ pom.xml.asc
 /profiles.clj
 dev/local.clj
 log/
+dev/resources/keypair

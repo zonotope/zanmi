@@ -25,4 +25,7 @@
 
    :secret (:secret env)
 
+   :keypair {:public  (:public-key env)
+             :private (:private-key env)}
+
    :api-key (:api-key env)})
