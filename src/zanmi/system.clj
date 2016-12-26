@@ -1,6 +1,5 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
-            [zanmi.component.keypair :refer [keypair]]
             [zanmi.component.logger :refer [timbre]]
             [zanmi.component.signer :refer [signer]]
             [zanmi.data.profile :refer [profile-schema]]
@@ -36,7 +35,6 @@
          :app              (handler-component (:app config))
          :db               (database (:db config))
          :http             (jetty-server (:http config))
-         :keypair          (keypair (:keypair config))
          :logger           (timbre (:logger config))
          :profile-endpoint (endpoint-component profile-routes)
          :profile-schema   (profile-schema (:profile-schema config))
@@ -45,4 +43,4 @@
         (component/system-using
          {:app              [:logger :profile-endpoint]
           :http             [:app]
-          :profile-endpoint [:db :keypair :logger :profile-schema :signer]}))))
+          :profile-endpoint [:db :logger :profile-schema :signer]}))))
