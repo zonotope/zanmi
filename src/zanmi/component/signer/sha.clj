@@ -2,14 +2,20 @@
   (:require [zanmi.boundary.signer :as signer]
             [buddy.sign.jwt :as jwt]))
 
-(defrecord ShaSigner [alg secret]
+(defn- alg-key [size]
+  (if (= size 256)
+    :hs256
+    :hs512))
+
+(defrecord ShaSigner [size secret]
   signer/Signer
   (sign [signer data]
-    (jwt/sign data secret {:alg alg}))
+    (let [alg (alg-key size)]
+      (jwt/sign data secret {:alg alg})))
 
-  (unsign [signer data]
-    (jwt/unsign data secret {:alg alg})))
+  (unsign [signer signed-data]
+    (let [alg (alg-key size)]
+      (jwt/unsign signed-data secret {:alg alg}))))
 
 (defn sha-signer [{:keys [size secret] :as config}]
-  (let [alg (if (= size 256) :hs256 :hs512)]
-    (->ShaSigner alg secret)))
+  (->ShaSigner size secret))

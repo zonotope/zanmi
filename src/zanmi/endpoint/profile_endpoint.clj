@@ -49,30 +49,29 @@
 ;; endpoint routes                                                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn profile-routes [{:keys [db keypair profile-schema] :as endpoint}]
-  (let [secret (:private keypair)]
-    (context route-prefix []
-      (POST "/" [username password]
-        (-> (create profile-schema {:username username :password password})
-            (as-> validated (db/save! db validated))
-            (match {:ok new-profile} (created new-profile secret)
-                   {:error messages} (error messages 409))))
+(defn profile-routes [{:keys [db profile-schema signer] :as endpoint}]
+  (context route-prefix []
+    (POST "/" [username password]
+      (-> (create profile-schema {:username username :password password})
+          (as-> validated (db/save! db validated))
+          (match {:ok new-profile} (created new-profile signer)
+                 {:error messages} (error messages 409))))
 
-      (context "/:username" [username]
-        (POST "/auth" [password]
-          (when-authenticated db username password
-                              (fn [profile] (ok profile secret))))
+    (context "/:username" [username]
+      (POST "/auth" [password]
+        (when-authenticated db username password
+                            (fn [profile] (ok profile signer))))
 
-        (PUT "/" [password new-password]
-          (when-authenticated db username password
-                              (fn [{:keys [username] :as profile}]
-                                (-> (update profile-schema profile new-password)
-                                    (as-> validated (db/set! db username validated))
-                                    (match {:ok new-profile} (ok new-profile secret)
-                                           {:error messages} (error messages 400))))))
+      (PUT "/" [password new-password]
+        (when-authenticated db username password
+                            (fn [{:keys [username] :as profile}]
+                              (-> (update profile-schema profile new-password)
+                                  (as-> validated (db/set! db username validated))
+                                  (match {:ok new-profile} (ok new-profile signer)
+                                         {:error messages} (error messages 400))))))
 
-        (DELETE "/" [password]
-          (when-authenticated db username password
-                              (fn [{:keys [username] :as profile}]
-                                (when (db/delete! db username)
-                                  (deleted username)))))))))
+      (DELETE "/" [password]
+        (when-authenticated db username password
+                            (fn [{:keys [username] :as profile}]
+                              (when (db/delete! db username)
+                                (deleted username))))))))

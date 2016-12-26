@@ -1,13 +1,13 @@
 (ns zanmi.view.profile-view
-  (:require [buddy.sign.jwt :as jwt]))
+  (:require [zanmi.boundary.signer :as signer]))
 
-(defn- sign [profile secret]
+(defn- token [profile signer]
   (-> profile
       (select-keys [:id :username :modified])
-      (jwt/sign secret {:alg :ps512})))
+      (as-> data (signer/sign signer data))))
 
-(defn render-token [profile secret]
-  {:token (sign profile secret)})
+(defn render-token [profile signer]
+  {:token (token profile signer)})
 
 (defn render-message [message]
   {:message message})
