@@ -2,6 +2,7 @@
   (:require [zanmi.component.database :refer [database]]
             [zanmi.component.logger :refer [timbre]]
             [zanmi.component.signer :refer [signer]]
+            [zanmi.component.signer.sha :refer [sha-signer]]
             [zanmi.data.profile :refer [profile-schema]]
             [zanmi.endpoint.profile-endpoint :refer [profile-routes]]
             [zanmi.util.middleware :refer [wrap-format wrap-logger]]
@@ -32,6 +33,8 @@
 (defn new-system [config]
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
+         :api-validator    (sha-signer {:secret (:api-key config)
+                                        :size 512})
          :app              (handler-component (:app config))
          :db               (database (:db config))
          :http             (jetty-server (:http config))
@@ -43,4 +46,5 @@
         (component/system-using
          {:app              [:logger :profile-endpoint]
           :http             [:app]
-          :profile-endpoint [:db :logger :profile-schema :signer]}))))
+          :profile-endpoint [:api-validator :db :logger :profile-schema
+                             :signer]}))))

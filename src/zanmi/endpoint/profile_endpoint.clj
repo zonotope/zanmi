@@ -1,5 +1,6 @@
 (ns zanmi.endpoint.profile-endpoint
   (:require [zanmi.boundary.database :as db]
+            [zanmi.boundary.signer :as signer]
             [zanmi.data.profile :refer [authenticate create update]]
             [zanmi.view.profile-view :refer [render-error render-message
                                              render-auth-token]]
@@ -36,7 +37,7 @@
   (response (render-auth-token profile signer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; request authentication                                                   ;;
+;; request authentication / authorization                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- when-user-authenticated [db username password response-fn]
@@ -44,6 +45,11 @@
                        (authenticate password))]
     (response-fn profile)
     (error "bad username or password" 401)))
+
+(defn- when-api-authenticated [validator request-token response-fn]
+  (if-let [payload (signer/unsign validator request-token)]
+    (response-fn payload)
+    (error "invalid request token" 401)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; endpoint routes                                                          ;;

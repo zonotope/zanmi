@@ -14,7 +14,9 @@
             [zanmi.system :as system]))
 
 (def dev-config
-  {:app {:middleware [wrap-stacktrace]}
+  {:api-key "unlock this door!"
+
+   :app {:middleware [wrap-stacktrace]}
 
    :db {:engine :postgres
         :username "zanmi"
@@ -35,9 +37,7 @@
    :signer {:algorithm :rsa-pss
             :size 512
             :keypair {:public  "dev/resources/keypair/pub.pem"
-                      :private "dev/resources/keypair/priv.pem"}}
-
-   :api-key "unlock this door!"})
+                      :private "dev/resources/keypair/priv.pem"}}})
 
 (def config
   (meta-merge config/defaults
