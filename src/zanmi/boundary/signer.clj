@@ -11,3 +11,8 @@
       (assoc :action :authenticate)
       (as-> data (sign signer data))))
 
+(defn reset-token [signer profile]
+  (-> profile
+      (select-keys [:id :username])
+      (assoc :action :reset)
+      (as-> data (sign signer data))))

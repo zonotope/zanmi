@@ -14,7 +14,7 @@
                    :id (java.util.UUID/randomUUID), :created now, :modified now}
           secret "nobody knows this!"
           signer (sha-signer {:secret secret, :size 256})
-          subject (:token (render-auth-token profile signer))]
+          subject (:auth-token (render-auth-token profile signer))]
       (is (not (nil? subject))
           "renders the token")
 

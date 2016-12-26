@@ -4,6 +4,9 @@
 (defn render-auth-token [profile signer]
   {:auth-token (signer/auth-token signer profile)})
 
+(defn render-reset-token [profile signer]
+  {:reset-token (signer/reset-token signer profile)})
+
 (defn render-message [message]
   {:message message})
 
