@@ -3,7 +3,8 @@
             [zanmi.boundary.signer :as signer]
             [zanmi.data.profile :refer [authenticate create update]]
             [zanmi.view.profile-view :refer [render-error render-message
-                                             render-auth-token]]
+                                             render-auth-token
+                                             render-reset-token]]
             [clojure.core.match :refer [match]]
             [compojure.core :refer [context DELETE POST PUT]]
             [ring.util.response :as response :refer [response]]))
@@ -36,6 +37,9 @@
 (defn- ok [profile signer]
   (response (render-auth-token profile signer)))
 
+(defn- reset [profile signer]
+  (response (render-reset-token profile signer)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; request authentication / authorization                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -50,6 +54,12 @@
   (if-let [payload (signer/unsign validator request-token)]
     (response-fn payload)
     (error "invalid request token" 401)))
+
+(defn- when-valid-reset-request [db username payload response-fn]
+  (let [requested-user (:username payload)]
+    (if (= username requested-user)
+      (response-fn (db/fetch db username))
+      (error "mismatched usernames" 409))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; actions                                                                  ;;
@@ -74,6 +84,9 @@
 
 (defn- show-auth-token [signer profile]
   (ok profile signer))
+
+(defn- show-reset-token [signer profile]
+  (reset profile signer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; endpoint routes                                                          ;;
@@ -100,4 +113,10 @@
       (POST "/auth" [password]
         (when-user-authenticated db username password
           (fn [profile]
-            (show-auth-token signer profile)))))))
+            (show-auth-token signer profile))))
+
+      (POST "/reset" [request-token]
+        (when-api-authenticated api-validator request-token
+          (fn [payload]
+            (when-valid-reset-request db username payload
+              (fn [profile] (show-reset-token signer profile)))))))))
