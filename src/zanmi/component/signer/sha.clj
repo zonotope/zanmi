@@ -18,4 +18,4 @@
       (jwt/unsign signed-data secret {:alg alg}))))
 
 (defn sha-signer [{:keys [size secret] :as config}]
-  (->ShaSigner size secret))
+  (map->ShaSigner config))

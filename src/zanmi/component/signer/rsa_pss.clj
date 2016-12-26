@@ -21,4 +21,7 @@
 (defn rsa-pss-signer [{:keys [size keypair] :as config}]
   (let [pubkey (keys/public-key (:public keypair))
         privkey (keys/private-key (:private keypair))]
-    (->RsaPssSigner size pubkey privkey)))
+    (-> config
+        (dissoc :keypair)
+        (assoc :public-key pubkey, :private-key privkey)
+        (map->RsaPssSigner))))
