@@ -2,7 +2,7 @@
   (:require [zanmi.boundary.database :as db]
             [zanmi.data.profile :refer [authenticate create update]]
             [zanmi.view.profile-view :refer [render-error render-message
-                                             render-token]]
+                                             render-auth-token]]
             [clojure.core.match :refer [match]]
             [compojure.core :refer [context DELETE POST PUT]]
             [ring.util.response :as response :refer [response]]))
@@ -22,7 +22,7 @@
 
 (defn- created [profile signer]
   (response/created (resource-url profile)
-                    (render-token profile signer)))
+                    (render-auth-token profile signer)))
 
 (defn- deleted [username]
   (let [deleted-message (format "profile for '%s' deleted" username)]
@@ -33,7 +33,7 @@
       (assoc :status status)))
 
 (defn- ok [profile signer]
-  (response (render-token profile signer)))
+  (response (render-auth-token profile signer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auth                                                                     ;;

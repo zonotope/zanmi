@@ -7,14 +7,14 @@
             [zanmi.view.profile-view :refer :all]
             [clojure.test :refer :all]))
 
-(deftest render-token-test
-  (testing "render-token"
+(deftest render-auth-token-test
+  (testing "render-auth-token"
     (let [now (time/now)
           profile {:username "tester", :hashed-password "a long hash",
                    :id (java.util.UUID/randomUUID), :created now, :modified now}
           secret "nobody knows this!"
           signer (sha-signer {:secret secret, :size 256})
-          subject (:token (render-token profile signer))]
+          subject (:token (render-auth-token profile signer))]
       (is (not (nil? subject))
           "renders the token")
 
