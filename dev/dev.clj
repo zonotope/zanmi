@@ -37,7 +37,9 @@
    :signer {:algorithm :rsa-pss
             :size 512
             :keypair {:public  "dev/resources/keypair/pub.pem"
-                      :private "dev/resources/keypair/priv.pem"}}})
+                      :private "dev/resources/keypair/priv.pem"}
+            :auth-expire-after 24
+            :reset-expire-after 1}})
 
 (def config
   (meta-merge config/defaults

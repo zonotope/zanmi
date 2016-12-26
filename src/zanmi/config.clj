@@ -29,6 +29,8 @@
             :size (some-> env :sign-hash-size Integer.)
             :secret (:sign-secret env)
             :keypair {:public  (:sign-public-key env)
-                      :private (:sign-private-key env)}}
+                      :private (:sign-private-key env)}
+            :auth-expire-after (some-> env :auth-expiration Integer.)
+            :reset-expire-after (some-> env :reset-expiration Integer.)}
 
    :api-key (:api-key env)})
