@@ -2,9 +2,31 @@
 
 HTTP authentication service built on [buddy](https://github.com/funcool/buddy).
 
-## Developing
+## Usage
 
-### Setup
+### Registering User Profiles
+
+### Authenticating Users
+
+### Resetting Passwords
+
+#### With Current Password
+
+#### With Reset Token
+
+### Removing User Profiles
+
+## Deployment
+
+### Configuration
+
+### Database Initialization
+
+## Contributing
+
+### Developing
+
+#### Setup
 
 When you first clone this repository, run:
 
@@ -15,7 +37,7 @@ lein setup
 This will create files for local configuration, and prep your system
 for the project.
 
-### Environment
+#### Environment
 
 To begin developing, start with a REPL.
 
@@ -48,7 +70,7 @@ dev=> (reset)
 :resumed
 ```
 
-### Testing
+#### Testing
 
 Testing is fastest through the REPL, as you avoid environment startup
 time.
@@ -63,36 +85,6 @@ But you can also run tests through Leiningen.
 ```sh
 lein test
 ```
-
-### Migrations
-
-Migrations are handled by [ragtime][]. Migration files are stored in
-the `resources/migrations` directory, and are applied in alphanumeric
-order.
-
-To update the database to the latest migration, open the REPL and run:
-
-```clojure
-dev=> (migrate)
-Applying 20150815144312-create-users
-Applying 20150815145033-create-posts
-```
-
-To rollback the last migration, run:
-
-```clojure
-dev=> (rollback)
-Rolling back 20150815145033-create-posts
-```
-
-Note that the system needs to be setup with `(init)` or `(go)` before
-migrations can be applied.
-
-[ragtime]: https://github.com/weavejester/ragtime
-
-## Deploying
-
-FIXME: steps to deploy
 
 ## Legal
 
