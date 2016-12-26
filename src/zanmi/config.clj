@@ -31,7 +31,4 @@
             :keypair {:public  (:sign-public-key env)
                       :private (:sign-private-key env)}}
 
-   :keypair {:public  (:public-key env)
-             :private (:private-key env)}
-
    :api-key (:api-key env)})
