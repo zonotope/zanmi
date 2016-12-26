@@ -22,6 +22,20 @@ HTTP authentication service built on [buddy](https://github.com/funcool/buddy).
 
 ### Database Initialization
 
+## FAQs
+* How do users log out?
+  - zanmi only supports password database management and stateless
+    authentication, so there is no session management. Client applications are
+    free to manage their own separate sessions and use that session in
+    combination with the `:iat` and `:updated` fields of the auth token to
+    support logout.
+
+* What's with the name?
+  - "zanmi" means [friend](https://github.com/cemerick/friend)
+    or [buddy](https://github.com/funcool/buddy) in Haitian Creole.
+
+## Plans
+
 ## Contributing
 
 ### Developing
