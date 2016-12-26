@@ -1,9 +1,10 @@
 (ns zanmi.view.profile-view-test
-  (:require [zanmi.data.profile :refer [create]]
+  (:require [zanmi.boundary.signer :as signer]
+            [zanmi.component.signer.sha :refer [sha-signer]]
+            [zanmi.data.profile :refer [create]]
             [zanmi.test-config :refer [config]]
             [zanmi.util.time :as time]
             [zanmi.view.profile-view :refer :all]
-            [buddy.sign.jwt :as jwt]
             [clojure.test :refer :all]))
 
 (deftest render-token-test
@@ -12,12 +13,13 @@
           profile {:username "tester", :hashed-password "a long hash",
                    :id (java.util.UUID/randomUUID), :created now, :modified now}
           secret "nobody knows this!"
-          subject (:token (render-token profile secret))]
+          signer (sha-signer {:secret secret, :size 256})
+          subject (:token (render-token profile signer))]
       (is (not (nil? subject))
           "renders the token")
 
       (testing "signs the data"
-        (let [unsigned (jwt/unsign subject secret)]
+        (let [unsigned (signer/unsign signer subject)]
           (is (not (nil? (:username unsigned)))
               "includes the username")
 
