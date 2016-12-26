@@ -36,10 +36,10 @@
   (response (render-auth-token profile signer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; auth                                                                     ;;
+;; request authentication                                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-authenticated [db username password response-fn]
+(defn- when-user-authenticated [db username password response-fn]
   (if-let [profile (-> (db/fetch db username)
                        (authenticate password))]
     (response-fn profile)
@@ -58,20 +58,20 @@
                  {:error messages} (error messages 409))))
 
     (context "/:username" [username]
-      (POST "/auth" [password]
-        (when-authenticated db username password
-                            (fn [profile] (ok profile signer))))
-
       (PUT "/" [password new-password]
-        (when-authenticated db username password
-                            (fn [{:keys [username] :as profile}]
-                              (-> (update profile-schema profile new-password)
-                                  (as-> validated (db/set! db username validated))
-                                  (match {:ok new-profile} (ok new-profile signer)
-                                         {:error messages} (error messages 400))))))
+        (when-user-authenticated db username password
+                                 (fn [{:keys [username] :as profile}]
+                                   (-> (update profile-schema profile new-password)
+                                       (as-> validated (db/set! db username validated))
+                                       (match {:ok new-profile} (ok new-profile signer)
+                                              {:error messages} (error messages 400))))))
 
       (DELETE "/" [password]
-        (when-authenticated db username password
-                            (fn [{:keys [username] :as profile}]
-                              (when (db/delete! db username)
-                                (deleted username))))))))
+        (when-user-authenticated db username password
+                                 (fn [{:keys [username] :as profile}]
+                                   (when (db/delete! db username)
+                                     (deleted username)))))
+
+      (POST "/auth" [password]
+        (when-user-authenticated db username password
+                                 (fn [profile] (ok profile signer)))))))
