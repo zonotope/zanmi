@@ -25,6 +25,12 @@
 
    :secret (:secret env)
 
+   :signer {:algorithm (:sign-algorithm env)
+            :size (:sign-hash-size env)
+            :secret (:sign-secret env)
+            :keypair {:public  (:sign-public-key env)
+                      :private (:sign-private-key env)}}
+
    :keypair {:public  (:public-key env)
              :private (:private-key env)}
 

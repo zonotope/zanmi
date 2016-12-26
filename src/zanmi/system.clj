@@ -2,6 +2,7 @@
   (:require [zanmi.component.database :refer [database]]
             [zanmi.component.keypair :refer [keypair]]
             [zanmi.component.logger :refer [timbre]]
+            [zanmi.component.signer :refer [signer]]
             [zanmi.data.profile :refer [profile-schema]]
             [zanmi.endpoint.profile-endpoint :refer [profile-routes]]
             [zanmi.util.middleware :refer [wrap-format wrap-logger]]
@@ -38,9 +39,10 @@
          :keypair          (keypair (:keypair config))
          :logger           (timbre (:logger config))
          :profile-endpoint (endpoint-component profile-routes)
-         :profile-schema   (profile-schema (:profile-schema config)))
+         :profile-schema   (profile-schema (:profile-schema config))
+         :signer           (signer (:signer config)))
 
         (component/system-using
          {:app              [:logger :profile-endpoint]
           :http             [:app]
-          :profile-endpoint [:db :keypair :logger :profile-schema]}))))
+          :profile-endpoint [:db :keypair :logger :profile-schema :signer]}))))

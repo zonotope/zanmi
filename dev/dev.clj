@@ -32,6 +32,10 @@
 
    :secret "nobody knows this!"
 
+   :signer {:algorithm :sha
+            :size 256
+            :secret "nobody knows this!"}
+
    :keypair {:public  "dev/resources/keypair/pub.pem"
              :private "dev/resources/keypair/priv.pem"}
 
