@@ -90,51 +90,10 @@ migrations can be applied.
 
 [ragtime]: https://github.com/weavejester/ragtime
 
-### Generators
-
-This project has several generator functions to help you create files.
-
-To create a new endpoint:
-
-```clojure
-dev=> (gen/endpoint "bar")
-Creating file src/foo/endpoint/bar.clj
-Creating file test/foo/endpoint/bar_test.clj
-Creating directory resources/foo/endpoint/bar
-nil
-```
-
-To create a new component:
-
-```clojure
-dev=> (gen/component "baz")
-Creating file src/foo/component/baz.clj
-Creating file test/foo/component/baz_test.clj
-nil
-```
-
-To create a new boundary:
-
-```clojure
-dev=> (gen/boundary "quz" foo.component.baz.Baz)
-Creating file src/foo/boundary/quz.clj
-Creating file test/foo/boundary/quz_test.clj
-nil
-```
-
-To create a new SQL migration:
-
-```clojure
-dev=> (gen/sql-migration "create-users")
-Creating file resources/foo/migrations/20160519143643-create-users.up.sql
-Creating file resources/foo/migrations/20160519143643-create-users.down.sql
-nil
-```
-
 ## Deploying
 
 FIXME: steps to deploy
 
 ## Legal
 
-Copyright © 2016 FIXME
+Copyright © 2016 ben lamothe
