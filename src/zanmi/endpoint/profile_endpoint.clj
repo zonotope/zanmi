@@ -20,9 +20,9 @@
 ;; responses                                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- created [profile secret]
+(defn- created [profile signer]
   (response/created (resource-url profile)
-                    (render-token profile secret)))
+                    (render-token profile signer)))
 
 (defn- deleted [username]
   (let [deleted-message (format "profile for '%s' deleted" username)]
@@ -32,8 +32,8 @@
   (-> (response (render-error e))
       (assoc :status status)))
 
-(defn- ok [profile secret]
-  (response (render-token profile secret)))
+(defn- ok [profile signer]
+  (response (render-token profile signer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auth                                                                     ;;
