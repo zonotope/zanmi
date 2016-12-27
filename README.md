@@ -6,7 +6,11 @@ their passwords and auth tokens independently of the apps or services they use.
 zanmi serves auth tokens in response to requests with the correct user
 credentials. It manages a self contained password database with configurable
 back ends (current support for PostgreSQL and MongoDB) and hashes passwords with
-BCrypt + SHA512.
+BCrypt + SHA512. The signing algorithm it signs it's auth tokens with is also
+configurable. [RSASSA-PSS](https://en.wikipedia.org/wiki/PKCS_1) is the default,
+but
+[ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) and
+[SHA512 HMAC](ttps://en.wikipedia.org/wiki/SHA-2) are also supported.
 
 ## Usage
 zanmi is designed to be deployed with SSL in production. User passwords will be
@@ -24,22 +28,23 @@ from the repository directory.
 
 Then generate an RSA keypair by running: `mkdir -p dev/resources/keypair/ &&
 openssl genrsa -out dev/resources/keypair/priv.pem 2048 && openssl rsa -pubout
--in dev/resources/keypair/priv.pem -out dev/resources/keypair/pub.pem`.
+-in dev/resources/keypair/priv.pem -out dev/resources/keypair/pub.pem` from the
+repository directory.
 
 Next run either a PostgreSQL or MongoDB server including a database user that
 can update and delete databases, then update the dev-config in the `dev/dev.clj`
-file with the database user credentials.
+file with the database/database user credentials.
 
 Now run `lein repl` from the repository directory. Then, from the repl, run:
 
 1. `(dev)` to load the development environment.
 2. `(init)` to load the system
-3. `(require '[zanmi.boundary.database :as db])` for database setup
+3. `(require '[zanmi.boundary.database :as db])` to load database setup fns
 4. `(db/initialize! (:db system))` to set up the database.
 5. `(start)` to start the server.
 
 The development server will be listening at `localhost:8686`. zanmi speaks json
-by default, but can also use transit/json if you set the requests
+by default, but can also use transit/json if you set the request's
 accept/content-type headers.
 
 #### Registering User Profiles
@@ -53,8 +58,8 @@ signed JWT auth token
 
 ##### With Current Password
 Put `{"password" : "old password", "new-password" : "new"}` to
-`localhost:8686/profiles/username/` to change the password in the database and get
-a new auth token
+`localhost:8686/profiles/username/` to change the password in the database and
+get a new auth token
 
 ##### With Reset Token
 First get a reset token by signing a request with the client api key and posting
@@ -63,15 +68,17 @@ user in an email or something. Then, put `{:reset-token token "new-password" :
 "password"}` to `localhost:8686/profiles/username/`.
 
 #### Removing User Profiles
-Delete `{"password" : "pass"}` to `localhost:8686/profiles/username` to delete the
-user's database record.
+Delete `{"password" : "pass"}` to `localhost:8686/profiles/username` to delete
+the user's database record.
 
 ## Deployment
 TBD
 
 ### Configuration
 
-See `dv-config` in `dev/dev.clj` for configuration options.
+See `dev-config` in `dev/dev.clj` for configuration options. You can also set
+the configuration from the environment. See `environ` in `src/zanmi/config.clj`
+for environment variable overrides.
 
 ### Database Initialization
 PostgreSQL and MongoDB are the only databases supported currently, but pull
