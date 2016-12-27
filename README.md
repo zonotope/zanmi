@@ -23,29 +23,30 @@ token signing algorithms are RSASSA-PSS (default), ECDSA, and SHA512 HMAC. Both
 RSA-PSS and ECDSA require paths to both a public and private key file, and
 SHA512 HMAC needs a secret supplied in the server config.
 
-To try it out in development, first clone this repository and run `lein setup`
-from the repository directory.
+To try it out in development:
 
-Then generate an RSA keypair by running the following from the repository
-directory:
+* clone this repository and run `lein setup` from the repository directory.
 
-```bash
-mkdir -p dev/resources/keypair/
-openssl genrsa -out dev/resources/keypair/priv.pem 2048
-openssl rsa -pubout -in dev/resources/keypair/priv.pem -out dev/resources/keypair/pub.pem
-```
+* generate an RSA keypair by running the following from the repository
+  directory:
 
-Next run either a PostgreSQL or MongoDB server including a database user that
-can update and delete databases, then update the dev-config in the `dev/dev.clj`
-file with the database/database user credentials.
+  ```sh
+  mkdir -p dev/resources/keypair/
+  openssl genrsa -out dev/resources/keypair/priv.pem 2048
+  openssl rsa -pubout -in dev/resources/keypair/priv.pem -out dev/resources/keypair/pub.pem
+  ```
 
-Now run `lein repl` from the repository directory. Then, from the repl, run:
+* run either a PostgreSQL or MongoDB server including a database user that can
+  update and delete databases, and update the dev-config in the `dev/dev.clj`
+  file with the database/database user credentials.
 
-1. `(dev)` to load the development environment.
-2. `(init)` to load the system
-3. `(require '[zanmi.boundary.database :as db])` to load database setup fns
-4. `(db/initialize! (:db system))` to set up the database.
-5. `(start)` to start the server.
+* run `lein repl` from the repository directory. Then, from the repl, run:
+
+  1. `(dev)` to load the development environment.
+  2. `(init)` to load the system
+  3. `(require '[zanmi.boundary.database :as db])` to load database setup fns
+  4. `(db/initialize! (:db system))` to set up the database.
+  5. `(start)` to start the server.
 
 The development server will be listening at `localhost:8686`. zanmi speaks json
 by default, but can also use transit/json if you set the request's
@@ -107,6 +108,7 @@ running system's database component.
 * Password database back ends for MySQL, Cassandra, etc.
 * Shared sessions (possibly with Redis)
 * Read configuration from edn files
+* Validate server config with clojure.spec
 
 ## Contributing
 Pull requests welcome!
