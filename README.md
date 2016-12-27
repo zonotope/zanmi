@@ -184,4 +184,6 @@ lein test
 
 ## Legal
 
-Copyright © 2016 ben lamothe
+Copyright © 2016 ben lamothe.
+
+Distributed under the MIT License
