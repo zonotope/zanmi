@@ -6,10 +6,24 @@ their passwords and auth tokens independently of the apps or services they use.
 
 ## Usage
 
-zanmi is designed to be deployed with SSL. It serves auth tokens from requests
-with the user's credentials. It manages a self contained password database with
-configurable back ends (current support for PostgreSQL and MongoDB) and hashes
-passwords with BCrypt + SHA512.
+zanmi is designed to be deployed with SSL in production. User passwords will be
+sent in the clear otherwise. It serves auth tokens from requests with the user's
+credentials. It manages a self contained password database with configurable
+back ends (current support for PostgreSQL and MongoDB) and hashes passwords with
+BCrypt + SHA512.
+
+To try it out in development, clone this repository and run either postgres or
+mongo locally. Update the dev config in `dev/dev.clj` with the database
+credentials and run `lein repl` from the repository directory. Then, from the
+repl, run:
+
+1. `(dev)` to load the development environment.
+2. `(init)` to load the system
+3. `(require '[zanmi.boundary.database :as db])`
+4. `(db/initialize! (:db system))` to set up the database.
+5. `(start)` to start the server.
+
+The development server will be listening at `localhost:8686`.
 
 #### Registering User Profiles
 
@@ -51,7 +65,7 @@ See `dv-config` in `dev/dev.clj` for configuration options.
 ### Database Initialization
 
 PostgreSQL and MongoDB are the only databases supported currently, but pull
-requests welcome.
+requests are welcome.
 
 There are no migrations. Call `zanmi.boundary.database/initialize!` on the
 running system's database component.
@@ -64,8 +78,8 @@ running system's database component.
     the `:iat` and `:updated` fields of the auth tokens to support logout.
 
 * What's with the name?
-  - "zanmi" means [friend](https://github.com/cemerick/friend)
-    or [buddy](https://github.com/funcool/buddy) in Haitian Creole.
+  - "zanmi" means [friend](https://github.com/cemerick/friend) or
+    [buddy](https://github.com/funcool/buddy) in Haitian Creole.
 
 ## Plans
 
