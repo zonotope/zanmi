@@ -56,24 +56,24 @@ accept/content-type headers.
 Post `{"username" : "name", "password" : "pass"}` to `localhost:8686/profiles/`.
 
 #### Authenticating Users
-Post `{"password" : "pass"}` to `localhost:8686/profiles/username/auth` to get a
-signed JWT auth token
+Post `{"password" : "pass"}` to `localhost:8686/profiles/<username>/auth` to get
+a signed JWT auth token
 
 #### Resetting Passwords
 
 ##### With Current Password
 Put `{"password" : "old password", "new-password" : "new"}` to
-`localhost:8686/profiles/username/` to change the password in the database and
+`localhost:8686/profiles/<username>/` to change the password in the database and
 get a new auth token
 
 ##### With Reset Token
 First get a reset token by signing a request with the client api key and posting
-it to `localhost:8686/profiles/username/reset`, and send the reset token to the
-user in an email or something. Then, put `{:reset-token token "new-password" :
-"password"}` to `localhost:8686/profiles/username/`.
+it to `localhost:8686/profiles/<username>/reset`, and send the reset token to
+the user in an email or something. Then, put `{:reset-token token
+"new-password" : "password"}` to `localhost:8686/profiles/<username>/`.
 
 #### Removing User Profiles
-Delete `{"password" : "pass"}` to `localhost:8686/profiles/username` to delete
+Delete `{"password" : "pass"}` to `localhost:8686/profiles/<username>` to delete
 the user's database record.
 
 ## Deployment
