@@ -96,7 +96,7 @@ PostgreSQL and MongoDB are the only databases supported currently, but pull
 requests are welcome.
 
 There are no migrations. Call `zanmi.boundary.database/initialize!` on the
-running system's database component.
+running system's database component to set up the database and database tables.
 
 ## FAQs
 * How do users log out?
@@ -112,9 +112,10 @@ running system's database component.
 ## Plans
 * Configurable password hashing schemes
 * Password database back ends for MySQL, Cassandra, etc.
+* More configurable password strength validations
 * Shared sessions (possibly with Redis)
 * Read configuration from edn files
-* Validate server config with clojure.spec
+* Validate configuration with clojure.spec
 
 ## Contributing
 Pull requests welcome!
