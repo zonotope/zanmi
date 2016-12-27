@@ -53,28 +53,34 @@ by default, but can also use transit/json if you set the request's
 accept/content-type headers.
 
 #### Registering User Profiles
-Post `{"username" : "name", "password" : "pass"}` to `localhost:8686/profiles/`.
+Post `{"username" : "name", "password" : "somethingnoonewillguess"}` to
+`localhost:8686/profiles/`.
+
+zanmi uses [zxcvbn-clj](https://github.com/zonotope/zxcvbn-clj) to validate
+password strength, so simple passwords like "p4ssw0rd" will fail validations and
+an error response will be returned.
 
 #### Authenticating Users
-Post `{"password" : "pass"}` to `localhost:8686/profiles/<username>/auth` to get
-a signed JWT auth token
+Post `{"password" : "somethingnoonewillguess"}` to
+`localhost:8686/profiles/<username>/auth` to get a signed JWT auth token.
 
 #### Resetting Passwords
 
 ##### With Current Password
-Put `{"password" : "old password", "new-password" : "new"}` to
-`localhost:8686/profiles/<username>/` to change the password in the database and
-get a new auth token
+Put `{"password" : "somethingnoonewillguess", "new-password" :
+"superduperunguessable"}` to `localhost:8686/profiles/<username>/` to change the
+password in the database and get a new auth token
 
 ##### With Reset Token
 First get a reset token by signing a request with the client api key and posting
 it to `localhost:8686/profiles/<username>/reset`, and send the reset token to
 the user in an email or something. Then, put `{:reset-token token
-"new-password" : "password"}` to `localhost:8686/profiles/<username>/`.
+"new-password" : "superduperunguessable"}` to
+`localhost:8686/profiles/<username>/`.
 
 #### Removing User Profiles
-Delete `{"password" : "pass"}` to `localhost:8686/profiles/<username>` to delete
-the user's database record.
+Delete `{"password" : "superduperunguessable"}` to
+`localhost:8686/profiles/<username>` to delete the user's database record.
 
 ## Deployment
 TBD
