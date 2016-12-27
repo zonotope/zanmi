@@ -26,10 +26,14 @@ SHA512 HMAC needs a secret supplied in the server config.
 To try it out in development, first clone this repository and run `lein setup`
 from the repository directory.
 
-Then generate an RSA keypair by running: `mkdir -p dev/resources/keypair/ &&
-openssl genrsa -out dev/resources/keypair/priv.pem 2048 && openssl rsa -pubout
--in dev/resources/keypair/priv.pem -out dev/resources/keypair/pub.pem` from the
-repository directory.
+Then generate an RSA keypair by running the following from the repository
+directory:
+
+```bash
+mkdir -p dev/resources/keypair/
+openssl genrsa -out dev/resources/keypair/priv.pem 2048
+openssl rsa -pubout -in dev/resources/keypair/priv.pem -out dev/resources/keypair/pub.pem
+```
 
 Next run either a PostgreSQL or MongoDB server including a database user that
 can update and delete databases, then update the dev-config in the `dev/dev.clj`
