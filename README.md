@@ -10,7 +10,7 @@ BCrypt + SHA512. The signing algorithm it signs it's auth tokens with is also
 configurable. [RSASSA-PSS](https://en.wikipedia.org/wiki/PKCS_1) is the default,
 but
 [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) and
-[SHA512 HMAC](ttps://en.wikipedia.org/wiki/SHA-2) are also supported.
+[SHA512 HMAC](https://en.wikipedia.org/wiki/SHA-2) are also supported.
 
 ## Usage
 zanmi is designed to be deployed with SSL in production. User passwords will be
