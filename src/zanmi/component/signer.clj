@@ -1,6 +1,6 @@
 (ns zanmi.component.signer
-  (:require [zanmi.component.signer.ecdsa :refer [ecdsa-signer]]
-            [zanmi.component.signer.rsa-pss :refer [rsa-pss-signer]]
+  (:require [zanmi.component.signer.asymetric :refer [ecdsa-signer
+                                                      rsa-pss-signer]]
             [zanmi.component.signer.sha :refer [sha-signer]]))
 
 (defn signer [config]
