@@ -56,10 +56,10 @@
     (error "invalid request token" 401)))
 
 (defn- when-valid-reset-request [db username payload response-fn]
-  (let [requested-user (:username payload)]
-    (if (= username requested-user)
-      (response-fn (db/fetch db username))
-      (error "mismatched usernames" 409))))
+  (if (= username (:username payload))
+    (when-let [profile (db/fetch db username)]
+      (response-fn profile))
+    (error "mismatched usernames" 409)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; actions                                                                  ;;

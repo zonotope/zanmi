@@ -13,8 +13,8 @@ but
 [SHA512 HMAC](https://en.wikipedia.org/wiki/SHA-2) are also supported.
 
 ## Usage
-zanmi is designed to be deployed with SSL in production. User passwords will be
-sent in the clear otherwise.
+zanmi is designed to be deployed with SSL/TLS in production. User passwords will
+be sent in the clear otherwise.
 
 zanmi depends on a database back end and a key pair/secret to sign tokens. Both
 the database and the algorithm used to sign tokens is configurable. The

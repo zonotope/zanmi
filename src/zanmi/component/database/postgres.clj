@@ -22,8 +22,8 @@
   {:datasource (make-datasource postgres)})
 
 (defn- connection-spec [{:keys [username password server-name
-                                     database-name]
-                              :as db}]
+                                database-name]
+                         :as db}]
   (let [subname (str "//" server-name "/" database-name)]
     {:subprotocol "postgresql"
      :subname subname
