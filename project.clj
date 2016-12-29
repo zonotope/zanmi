@@ -7,6 +7,7 @@
 
   :dependencies [[org.clojure/clojure "1.9.0-alpha10"]
                  [org.clojure/core.match "0.3.0-alpha4"]
+                 [org.clojure/data.codec "0.1.0"]
 
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.0"]
