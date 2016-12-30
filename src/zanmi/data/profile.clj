@@ -43,8 +43,12 @@
                                      (select-keys [:hashed-password]))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; password validation                                                      ;;
+;; profile validation                                                       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvalidator no-colon {:default-message-format "%s can't have a ':'"}
+  [username]
+  (not (string/includes? username ":")))
 
 (defn- password-error-message [path value]
   (let [{:keys [suggestions warning]} (:feedback (zxcvbn/check value))
@@ -64,6 +68,7 @@
 (defn profile-schema [{:keys [username-length password-length password-score]}]
   {:username [required
               string
+              no-colon
               [max-count username-length]]
 
    :password [required
