@@ -1,6 +1,6 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
-            [zanmi.component.logger :refer [timbre]]
+            [zanmi.component.timbre :refer [timbre]]
             [zanmi.component.signer :refer [signer]]
             [zanmi.component.signer.sha :refer [sha-signer]]
             [zanmi.data.profile :refer [profile-schema]]

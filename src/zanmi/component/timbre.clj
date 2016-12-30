@@ -1,4 +1,4 @@
-(ns zanmi.component.logger
+(ns zanmi.component.timbre
   (:require [zanmi.boundary.logger :as logger]
             [taoensso.timbre :as timbre]
             [taoensso.timbre.appenders.3rd-party.rolling

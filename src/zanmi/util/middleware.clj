@@ -1,10 +1,10 @@
 (ns zanmi.util.middleware
-  (:require [zanmi.component.logger :as logger]
+  (:require [zanmi.component.timbre :as logger]
             [ring.logger :refer [wrap-with-logger]]
             [ring.logger.protocols]
             [ring.middleware.format :refer [wrap-restful-format]]
             [taoensso.timbre :as timbre])
-  (:import (zanmi.component.logger Timbre)))
+  (:import (zanmi.component.timbre Timbre)))
 
 (extend-protocol ring.logger.protocols/Logger
   Timbre
