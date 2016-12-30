@@ -5,8 +5,9 @@ their passwords and auth tokens independently of the apps or services they use.
 
 zanmi serves auth tokens in response to requests with the correct user
 credentials. It manages a self contained password database with configurable
-back ends (current support for PostgreSQL and MongoDB) and hashes passwords with
-BCrypt + SHA512. The signing algorithm it signs it's auth tokens with is also
+back ends (current support for PostgreSQL and MongoDB) and hashes passwords
+with [BCrypt + SHA512](https://en.wikipedia.org/wiki/Bcrypt). The signing
+algorithm it signs it's auth tokens with is also
 configurable. [RSASSA-PSS](https://en.wikipedia.org/wiki/PKCS_1) is the default,
 but
 [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) and
@@ -52,35 +53,56 @@ The development server will be listening at `localhost:8686`. zanmi speaks json
 by default, but can also use transit/json if you set the request's
 accept/content-type headers.
 
+We'll use [cURL](https://curl.haxx.se) to make requests to the dev server. Enter
+the following commands into a new terminal.
+
 #### Registering User Profiles
-Post `{"username" : "name", "password" : "somethingnoonewillguess"}` to
-`localhost:8686/profiles/`.
+Send a `post` request to the profiles url with your credentials to register a
+new user:
+
+```bash
+curl -XPOST --data "username=gwcarver&password=pulverized peanuts" localhost:8686/profiles/
+```
 
 zanmi uses [zxcvbn-clj](https://github.com/zonotope/zxcvbn-clj) to validate
 password strength, so simple passwords like "p4ssw0rd" will fail validations and
-an error response will be returned.
+an error response will be returned. The server will respond with an auth token
+if the password is strong enough and the username isn't already taken.
 
 #### Authenticating Users
-Post `{"password" : "somethingnoonewillguess"}` to
-`localhost:8686/profiles/<username>/auth` to get a signed JWT auth token.
+Clients send user credentials with http basic auth to zanmi servers to
+authenticate against existing user profiles. To verify that you have the right
+password, send a `post` request to the user's profile auth url with the
+credentials formatted `"username:password"` after the `-u` command switch to
+cURL:
+
+```bash
+curl -XPOST -u "gwcarver:pulverized peanuts" localhost:8686/profiles/gwcarver/auth
+```
+
+The server will respond with an auth token if the credentials are correct.
 
 #### Resetting Passwords
 
 ##### With Current Password
-Put `{"password" : "somethingnoonewillguess", "new-password" :
-"superduperunguessable"}` to `localhost:8686/profiles/<username>/` to change the
-password in the database and get a new auth token
+To reset the user's password, send a `put` request to the user's profile url
+with the existing credentials through basic auth and the new password in the
+request body:
 
-##### With Reset Token
-First get a reset token by signing a request with the client api key and posting
-it to `localhost:8686/profiles/<username>/reset`, and send the reset token to
-the user in an email or something. Then, put `{:reset-token token
-"new-password" : "superduperunguessable"}` to
-`localhost:8686/profiles/<username>/`.
+```bash
+curl -XPUT -u "gwcarver:pulverized peanuts" --data "new-password=succulent sweet potatos" localhost:8686/profiles/gwcarver
+```
+
+The server will respond with a new auth token if your credentials are correct
+and the new password is strong enough according to zxcvbn
 
 #### Removing User Profiles
-Delete `{"password" : "superduperunguessable"}` to
-`localhost:8686/profiles/<username>` to delete the user's database record.
+To remove a user's profile from the database, send a delete request to the
+users's profile url with the right credentials:
+
+```bash
+curl -XDELETE -u "gwcarver:succulent sweet potatos" localhost:8686/profiles/gwcarver
+```
 
 ## Deployment
 TBD
