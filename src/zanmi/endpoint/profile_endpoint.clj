@@ -44,11 +44,14 @@
 ;; request authentication / authorization                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-user-authenticated [db username password response-fn]
-  (if-let [profile (-> (db/fetch db username)
-                       (authenticate password))]
-    (response-fn profile)
-    (error "bad username or password" 401)))
+(defn- when-user-authenticated [db username {:keys [password] :as credentials}
+                                response-fn]
+  (if (= username (:username credentials))
+    (if-let [profile (-> (db/fetch db username)
+                         (authenticate password))]
+      (response-fn profile)
+      (error "bad username or password" 401))
+    (error "unauthorized" 409)))
 
 (defn- when-api-authenticated [validator request-token response-fn]
   (if-let [payload (signer/unsign validator request-token)]
@@ -89,7 +92,7 @@
   (reset profile signer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; endpoint routes                                                          ;;
+;; routes                                                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn profile-routes [{:keys [api-validator db profile-schema signer]
@@ -99,19 +102,19 @@
       (let [attrs {:username username :password password}]
         (create-profile db profile-schema signer attrs)))
 
-    (context "/:username" [username]
-      (PUT "/" [password new-password]
-        (when-user-authenticated db username password
+    (context "/:username" [username :as {:keys [credentials]}]
+      (PUT "/" [new-password]
+        (when-user-authenticated db username credentials
           (fn [profile]
             (update-password db profile-schema signer profile new-password))))
 
-      (DELETE "/" [password]
-        (when-user-authenticated db username password
+      (DELETE "/" []
+        (when-user-authenticated db username credentials
           (fn [profile]
             (delete-profile db profile))))
 
-      (POST "/auth" [password]
-        (when-user-authenticated db username password
+      (POST "/auth" []
+        (when-user-authenticated db username credentials
           (fn [profile]
             (show-auth-token signer profile))))
 
