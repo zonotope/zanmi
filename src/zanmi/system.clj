@@ -5,6 +5,7 @@
             [zanmi.component.signer.sha :refer [sha-signer]]
             [zanmi.data.profile :refer [profile-schema]]
             [zanmi.endpoint.profile-endpoint :refer [profile-routes]]
+            [zanmi.middleware.credentials :refer [wrap-credentials]]
             [zanmi.util.middleware :refer [wrap-format wrap-logger]]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
@@ -15,9 +16,10 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]))
 
 (def base-config
-  {:app {:middleware [[wrap-format :formats]
+  {:app {:middleware [[wrap-defaults :defaults]
                       [wrap-not-found :not-found]
-                      [wrap-defaults :defaults]
+                      [wrap-format :formats]
+                      [wrap-credentials]
                       [wrap-logger :logger]]
 
          :not-found "Resource Not Found"
