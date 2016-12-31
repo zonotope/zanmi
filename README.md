@@ -1,4 +1,6 @@
 # zanmi
+[![Clojars Project](https://img.shields.io/clojars/v/zanmi.svg)](https://clojars.org/zanmi)
+
 An HTTP identity service built
 on [buddy](https://github.com/funcool/buddy). Authenticate users while managing
 their passwords and auth tokens independently of the apps or services they use.
