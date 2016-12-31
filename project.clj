@@ -71,6 +71,6 @@
 
                    :repl-options {:init-ns user}
 
-                   :env {}}
+                   :env {:zanmi-config "resources/zanmi/config.edn"}}
 
    :project/test  {}})

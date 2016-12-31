@@ -1,13 +1,13 @@
 # zanmi
-An HTTP authentication service built
+An HTTP identity service built
 on [buddy](https://github.com/funcool/buddy). Authenticate users while managing
 their passwords and auth tokens independently of the apps or services they use.
 
 zanmi serves auth tokens in response to requests with the correct user
 credentials. It manages a self contained password database with configurable
 back ends (current support for PostgreSQL and MongoDB) and hashes passwords
-with [BCrypt + SHA512](https://en.wikipedia.org/wiki/Bcrypt). The signing
-algorithm it signs it's auth tokens with is also
+with [BCrypt + SHA512](https://en.wikipedia.org/wiki/Bcrypt) before they're
+stored. The signing algorithm zanmi signs it's auth tokens with is also
 configurable. [RSASSA-PSS](https://en.wikipedia.org/wiki/PKCS_1) is the default,
 but
 [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) and
@@ -28,8 +28,8 @@ To try it out in development:
 
 * clone this repository and run `lein setup` from the repository directory.
 
-* generate an RSA keypair by running the following from the repository
-  directory:
+* generate an RSA keypair with [openssl](https://www.openssl.org/) by running
+  the following from the repository directory:
 
   ```sh
   mkdir -p dev/resources/keypair/
@@ -131,18 +131,18 @@ running system's database component to set up the database and database tables.
   - "zanmi" means [friend](https://github.com/cemerick/friend) or
     [buddy](https://github.com/funcool/buddy) in Haitian Creole.
 
-## Plans
-* Configurable password hashing schemes
+## TODO
+* Configurable password hashing schemes (support for pbkdf2, scrypt, etc)
 * Password database back ends for MySQL, Cassandra, etc.
 * More configurable password strength validations
 * Shared sessions (possibly with Redis)
-* Read configuration from edn files
-* Validate configuration with clojure.spec
+* Validate zanmi configuration map with clojure.spec
 
 ## Contributing
 Pull requests welcome!
 
 ### Developing
+First install [leiningen](http://leiningen.org/) and clone the repository.
 
 #### Setup
 

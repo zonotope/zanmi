@@ -17,11 +17,12 @@
 
 (def config
   (meta-merge config/defaults
+              config/file
               config/environ
               prod-config))
 
 (defn -main [& args]
   (let [system (new-system config)]
-    (println "Starting HTTP server on port" (-> system :http :port))
+    (println "Starting zanmi http server on port" (-> system :http :port))
     (add-shutdown-hook ::stop-system #(component/stop system))
     (component/start system)))

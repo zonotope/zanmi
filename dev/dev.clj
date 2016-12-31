@@ -13,36 +13,11 @@
             [zanmi.config :as config]
             [zanmi.system :as system]))
 
-(def dev-config
-  {:api-key "unlock this door!"
-
-   :app {:middleware [wrap-stacktrace]}
-
-   :db {:engine :postgres
-        :username "zanmi"
-        :password "zanmi-password"
-        :host "localhost"
-        :db-name "zanmi_dev"}
-
-   :logger {:level :info
-            :path "log/zanmi.log"
-            :pattern :daily}
-
-   :profile-schema {:username-length 32
-                    :password-length 64
-                    :password-score 3}
-
-   :secret "nobody knows this!"
-
-   :signer {:algorithm :rsa-pss
-            :size 512
-            :keypair {:public  "dev/resources/keypair/pub.pem"
-                      :private "dev/resources/keypair/priv.pem"}
-            :auth-expire-after 24
-            :reset-expire-after 1}})
+(def dev-config {:app {:middleware [wrap-stacktrace]}})
 
 (def config
   (meta-merge config/defaults
+              config/file
               config/environ
               dev-config))
 
