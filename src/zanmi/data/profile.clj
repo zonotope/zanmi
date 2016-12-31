@@ -23,6 +23,11 @@
       (dissoc :hashed-password)
       (assoc :password new-password)))
 
+(defn- create-sanitize [attrs]
+  (-> attrs
+      (select-keys [:username :password])
+      (with-id)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; profile processing                                                       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -32,7 +37,7 @@
     profile))
 
 (defn create [schema attrs]
-  (let [create-attrs (with-id attrs)]
+  (let [create-attrs (create-sanitize attrs)]
     (when-valid create-attrs schema
                 (fn [valid-attrs] (hash-password valid-attrs)))))
 
