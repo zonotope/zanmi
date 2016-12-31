@@ -8,21 +8,29 @@
             [ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect]]
             [meta-merge.core :refer [meta-merge]]))
 
+(def ssl-config
+  {:app {:middleware [[wrap-hsts wrap-ssl-redirect]]}})
+
 (def prod-config
-  {:app {:middleware [[wrap-hide-errors :internal-error]
-                      wrap-hsts
-                      wrap-ssl-redirect]
+  {:app {:middleware [[wrap-hide-errors :internal-error]]
 
          :internal-error "Internal Server Error"}})
 
-(def config
+(defn- config-map [& args]
   (meta-merge config/defaults
               config/file
               config/environ
+              (when-not (:skip-ssl args) ssl-config)
               prod-config))
 
+(defn- parse-command-line-args [args]
+  (into {} (map #(when (= % "--skip-ssl") {:skip-ssl true})
+                args)))
+
 (defn -main [& args]
-  (let [system (new-system config)]
+  (let [cli    (parse-command-line-args args)
+        config (config-map cli)
+        system (new-system config)]
     (println "Starting zanmi http server on port" (-> system :http :port))
     (add-shutdown-hook ::stop-system #(component/stop system))
     (component/start system)))
