@@ -55,8 +55,15 @@ The development server will be listening at `localhost:8686`. zanmi speaks json
 by default, but can also use transit/json if you set the request's
 accept/content-type headers.
 
-We'll use [cURL](https://curl.haxx.se) to make requests to the dev server. Enter
-the following commands into a new terminal.
+### Clients
+
+There is a [Clojure zanmi client](https://github.com/zonotope/zanmi-client) in
+development, and since zanmi is just an http server, clients for other languages
+should be easy to write as long as those languages have a good http library.
+
+We'll use [cURL](https://curl.haxx.se) to make requests to the running server to
+be as general as possible. Enter the following commands into a new terminal
+window.
 
 #### Registering User Profiles
 Send a `post` request to the profiles url with your credentials to register a
@@ -86,7 +93,7 @@ The server will respond with an auth token if the credentials are correct.
 
 #### Resetting Passwords
 
-##### With Current Password
+##### With the Current Password
 To reset the user's password, send a `put` request to the user's profile url
 with the existing credentials through basic auth and the new password in the
 request body:
@@ -101,6 +108,9 @@ and the new password is strong enough according to zxcvbn
 #### Removing User Profiles
 To remove a user's profile from the database, send a delete request to the
 users's profile url with the right credentials:
+
+##### With a Reset Token
+
 
 ```bash
 curl -XDELETE -u "gwcarver:succulent sweet potatos" localhost:8686/profiles/gwcarver

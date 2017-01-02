@@ -53,6 +53,14 @@
       (error "bad username or password" 401))
     (error "unauthorized" 409)))
 
+(defn- when-valid-reset-token [signer reset-token username validated-fn]
+  (if-let [payload (signer/unsign signer reset-token)]
+    (if (and (= username (:username payload))
+             (= (:action payload) "reset"))
+      (validated-fn payload)
+      (error "unauthorized" 409))
+    (error "invalid reset token" 401)))
+
 (defn- when-api-authenticated [validator request-token response-fn]
   (if-let [payload (signer/unsign validator request-token)]
     (response-fn payload)
@@ -103,10 +111,13 @@
         (create-profile db profile-schema signer attrs)))
 
     (context "/:username" [username :as {:keys [credentials]}]
-      (PUT "/" [new-password]
-        (when-user-authenticated db username credentials
-          (fn [profile]
-            (update-password db profile-schema signer profile new-password))))
+      (PUT "/" [reset-token new-password]
+        (letfn [(update-pw [profile]
+                  (update-password db profile-schema signer profile
+                                   new-password))]
+          (if reset-token
+            (when-valid-reset-token signer reset-token username update-pw)
+            (when-user-authenticated db username credentials update-pw))))
 
       (DELETE "/" []
         (when-user-authenticated db username credentials
