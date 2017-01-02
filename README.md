@@ -28,35 +28,42 @@ SHA512 HMAC needs a secret supplied in the server config.
 
 To try it out in development:
 
-* clone this repository and run `lein setup` from the repository directory.
+* download the latest release jar
 
 * generate an RSA keypair with [openssl](https://www.openssl.org/) by running
-  the following from the repository directory:
+  the following in a terminal, where `<keypair path>` is some path of your
+  choosing:
 
   ```sh
-  mkdir -p dev/resources/keypair/
-  openssl genrsa -out dev/resources/keypair/priv.pem 2048
-  openssl rsa -pubout -in dev/resources/keypair/priv.pem -out dev/resources/keypair/pub.pem
+  mkdir -p <keypair path>
+  openssl genrsa -out <keypair path>/priv.pem 2048
+  openssl rsa -pubout -in <keypair path>/priv.pem -out <keypair path>/pub.pem
   ```
 
 * run either a PostgreSQL or MongoDB server including a database user that can
-  update and delete databases, and update the dev-config in the `dev/dev.clj`
-  file with the database/database user credentials.
+  update and delete databases.
 
-* run `lein repl` from the repository directory. Then, from the repl, run:
+* download and edit the example config by adding a random string as an api key
+  and replacing the keypair paths and database credentials with your own.
 
-  1. `(dev)` to load the development environment.
-  2. `(init)` to load the system
-  3. `(require '[zanmi.boundary.database :as db])` to load database setup fns
-  4. `(db/initialize! (:db system))` to set up the database.
-  5. `(start)` to start the server.
+* initialize the database by running:
 
-The development server will be listening at `localhost:8686`. zanmi speaks json
-by default, but can also use transit/json if you set the request's
-accept/content-type headers.
+  ```sh
+  ZANMI_CONFIG=<path to edited config> java -jar <zanmi release jar> --init-db
+  ```
+
+* zanmi was designed to be run with ssl, but we'll turn it off just for this
+  demonstration. start the server by running:
+
+  ```sh
+  ZANMI_CONFIG=<path to edited config> java -jar <zanmi release jar> --skip-ssl
+  ```
+
+The server will be listening at `localhost:8686` (unless you changed the port in
+the config). zanmi speaks json by default, but can also use transit/json if you
+set the request's accept/content-type headers.
 
 ### Clients
-
 There is a [Clojure zanmi client](https://github.com/zonotope/zanmi-client) in
 development, and since zanmi is just an http server, clients for other languages
 should be easy to write as long as those languages have a good http library.
@@ -105,32 +112,35 @@ curl -XPUT -u "gwcarver:pulverized peanuts" --data "new-password=succulent sweet
 The server will respond with a new auth token if your credentials are correct
 and the new password is strong enough according to zxcvbn
 
+##### With a Reset Token
+zanmi also supports resetting user passwords if they've forgotten them. More
+support for reset tokens through raw http requests will be added soon, but see
+the clojure client, where it's fully supported, for more information.
+
+
 #### Removing User Profiles
+
+##### With Valid Credentials
 To remove a user's profile from the database, send a delete request to the
 users's profile url with the right credentials:
-
-##### With a Reset Token
-
 
 ```bash
 curl -XDELETE -u "gwcarver:succulent sweet potatos" localhost:8686/profiles/gwcarver
 ```
 
 ## Deployment
-TBD
 
 ### Configuration
-
-See `dev-config` in `dev/dev.clj` for configuration options. You can also set
-the configuration from the environment. See `environ` in `src/zanmi/config.clj`
-for environment variable overrides.
+See the [example config]() for configuration options. You can also set the
+configuration from the environment. See `environ` in `src/zanmi/config.clj` for
+environment variable overrides.
 
 ### Database Initialization
 PostgreSQL and MongoDB are the only databases supported currently, but pull
 requests are welcome.
 
-There are no migrations. Call `zanmi.boundary.database/initialize!` on the
-running system's database component to set up the database and database tables.
+There are no migrations. Use the `--init-db` command line switch to set up the
+database and database tables.
 
 ## FAQs
 * How do users log out?
