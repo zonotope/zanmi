@@ -1,7 +1,7 @@
 # zanmi
 [![Clojars Project](https://img.shields.io/clojars/v/zanmi.svg)](https://clojars.org/zanmi)
 
-An HTTP identity service built
+An HTTP identity service based on JWT auth tokens, and built
 on [buddy](https://github.com/funcool/buddy). Authenticate users while managing
 their passwords and auth tokens independently of the apps or services they use.
 
@@ -19,9 +19,10 @@ but
 zanmi is designed to be deployed with SSL/TLS in production. User passwords will
 be sent in the clear otherwise.
 
-zanmi depends on a database back end and a key pair/secret to sign tokens. Both
-the database and the algorithm used to sign tokens is configurable. The
-supported databases are PostgreSQL (default) and MongoDB, and the supported
+zanmi is a way to share authentication across many independent services and
+front ends. it depends on a database back end and a key pair/secret to sign
+tokens. Both the database and the algorithm used to sign tokens is configurable.
+The supported databases are PostgreSQL (default) and MongoDB, and the supported
 token signing algorithms are RSASSA-PSS (default), ECDSA, and SHA512 HMAC. Both
 RSA-PSS and ECDSA require paths to both a public and private key file, and
 SHA512 HMAC needs a secret supplied in the server config.

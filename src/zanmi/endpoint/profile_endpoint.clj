@@ -56,7 +56,7 @@
 (defn- when-valid-reset-token [signer reset-token username validated-fn]
   (if-let [payload (signer/unsign signer reset-token)]
     (if (and (= username (:username payload))
-             (= (:action payload) "reset"))
+             (= (:sub payload) "reset"))
       (validated-fn payload)
       (error "unauthorized" 409))
     (error "invalid reset token" 401)))

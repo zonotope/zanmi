@@ -8,16 +8,16 @@
 
 (defn auth-token [signer profile]
   (let [now (time/now)
-        exp (time/in-hours (:auth-expire-after signer))]
+        exp (time/in-hours (:auth-exp signer))]
     (-> profile
         (select-keys [:id :username :modified])
-        (assoc :action :authenticate, :iat now, :exp exp)
+        (assoc :sub "authenticate", :iat now, :exp exp)
         (as-> data (sign signer data)))))
 
 (defn reset-token [signer profile]
   (let [now (time/now)
-        exp (time/in-hours (:reset-expire-after signer))]
+        exp (time/in-hours (:reset-exp signer))]
     (-> profile
         (select-keys [:id :username])
-        (assoc :action :reset, :iat now, :exp exp)
+        (assoc :sub "reset", :iat now, :exp exp)
         (as-> data (sign signer data)))))

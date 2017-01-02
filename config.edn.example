@@ -22,9 +22,8 @@
                   :password-score 3}
 
  ;; configuration for signing auth tokens
- :signer {:algorithm :rsa-pss
-          :size 512
+ :signer {:alg :ps512
           :keypair {:public  "/home/zanmi/keypair/pub.pem"
                     :private "/home/zanmi/keypair/priv.pem"}
-          :auth-expire-after 24
-          :reset-expire-after 1}}
+          :auth-exp 24
+          :reset-exp 1}}

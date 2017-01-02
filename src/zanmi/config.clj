@@ -28,13 +28,12 @@
                     :password-length (some-> env :password-length Integer.)
                     :password-score (some-> env :password-score Integer.)}
 
-   :signer {:algorithm (some-> env :sign-algorithm symbol)
-            :size (some-> env :sign-hash-size Integer.)
+   :signer {:alg (some-> env :sign-algorithm symbol)
             :secret (:sign-secret env)
             :keypair {:public  (:sign-public-key env)
                       :private (:sign-private-key env)}
-            :auth-expire-after (some-> env :auth-expiration Integer.)
-            :reset-expire-after (some-> env :reset-expiration Integer.)}})
+            :auth-exp (some-> env :auth-expiration Integer.)
+            :reset-exp (some-> env :reset-expiration Integer.)}})
 
 (def file
   (when-let [path (:zanmi-config env)]

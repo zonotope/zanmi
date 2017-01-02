@@ -13,8 +13,8 @@
           profile {:username "tester", :hashed-password "a long hash",
                    :id (java.util.UUID/randomUUID), :created now, :modified now}
           secret "nobody knows this!"
-          signer (sha-signer {:secret secret, :size 256, :auth-expire-after 1,
-                              :reset-expire-after 1})
+          signer (sha-signer {:secret secret, :size 256, :auth-exp 1,
+                              :reset-exp 1})
           subject (:auth-token (render-auth-token profile signer))]
       (is (not (nil? subject))
           "renders the token")

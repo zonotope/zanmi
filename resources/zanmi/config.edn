@@ -16,9 +16,8 @@
                   :password-length 64
                   :password-score 3}
 
- :signer {:algorithm :rsa-pss
-          :size 512
+ :signer {:alg :ps512
           :keypair {:public  "dev/resources/keypair/pub.pem"
                     :private "dev/resources/keypair/priv.pem"}
-          :auth-expire-after 24
-          :reset-expire-after 1}}
+          :auth-exp 24
+          :reset-exp 1}}
