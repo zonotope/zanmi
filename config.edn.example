@@ -1,0 +1,30 @@
+{;; random string used to sign requests for reset tokens
+ :api-key "123-456-789-abc-def-ghi"
+
+ ;; database credentials
+ :db {:engine :postgres
+      :username "zanmi"
+      :password "zanmi-password"
+      :host "localhost"
+      :db-name "zanmi_dev"}
+
+ ;; web server port
+ :http {:port 8686}
+
+ ;; log output config
+ :logger {:level :info
+          :path "/var/log/zanmi.log"
+          :pattern :daily}
+
+ ;; profile validations
+ :profile-schema {:username-length 32
+                  :password-length 64
+                  :password-score 3}
+
+ ;; configuration for signing auth tokens
+ :signer {:algorithm :rsa-pss
+          :size 512
+          :keypair {:public  "/home/zanmi/keypair/pub.pem"
+                    :private "/home/zanmi/keypair/priv.pem"}
+          :auth-expire-after 24
+          :reset-expire-after 1}}

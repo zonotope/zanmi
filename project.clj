@@ -1,5 +1,5 @@
-(defproject zanmi "0.1.0-SNAPSHOT"
-  :description "Authentication micro-service"
+(defproject zanmi "0.1.0-alpha1"
+  :description "Identity http service"
 
   :url "https://github.com/zonotope/zanmi"
 
