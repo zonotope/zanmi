@@ -1,6 +1,7 @@
 (ns zanmi.main
   (:gen-class)
-  (:require [zanmi.config :as config]
+  (:require [zanmi.boundary.database :as db]
+            [zanmi.config :as config]
             [zanmi.system :refer [new-system]]
             [com.stuartsierra.component :as component]
             [duct.middleware.errors :refer [wrap-hide-errors]]
@@ -24,13 +25,18 @@
               prod-config))
 
 (defn- parse-command-line-args [args]
-  (into {} (map #(when (= % "--skip-ssl") {:skip-ssl true})
+  (into {} (map (fn [arg] (cond
+                           (= arg "--skip-ssl") {:skip-ssl true}
+                           (= arg "--init-db") {:init-db true}))
                 args)))
 
 (defn -main [& args]
   (let [cli    (parse-command-line-args args)
         config (config-map cli)
         system (new-system config)]
-    (println "Starting zanmi http server on port" (-> system :http :port))
-    (add-shutdown-hook ::stop-system #(component/stop system))
-    (component/start system)))
+    (if (:init-db cli)
+      (do (println "Inizializing zanmi database")
+          (db/initialize! (:db system)))
+      (do (println "Starting zanmi http server on port" (-> system :http :port))
+          (add-shutdown-hook ::stop-system #(component/stop system))
+          (component/start system)))))
