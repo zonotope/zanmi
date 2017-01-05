@@ -5,7 +5,7 @@
             [zanmi.component.signer.sha :refer [sha-signer]]
             [zanmi.data.profile :refer [profile-schema]]
             [zanmi.endpoint.profile-endpoint :refer [profile-routes]]
-            [zanmi.middleware.credentials :refer [wrap-credentials]]
+            [zanmi.middleware.authentication :refer [wrap-authentication]]
             [zanmi.middleware.format :refer [wrap-format]]
             [zanmi.middleware.logger :refer [wrap-logger]]
             [com.stuartsierra.component :as component]
@@ -20,7 +20,7 @@
   {:app {:middleware [[wrap-defaults :defaults]
                       [wrap-not-found :not-found]
                       [wrap-format :formats]
-                      [wrap-credentials]
+                      [wrap-authentication :db]
                       [wrap-logger :logger]]
 
          :not-found "Resource Not Found"
@@ -47,7 +47,7 @@
          :signer           (signer (:signer config)))
 
         (component/system-using
-         {:app              [:logger :profile-endpoint]
+         {:app              [:db :logger :profile-endpoint]
           :http             [:app]
           :profile-endpoint [:api-validator :db :logger :profile-schema
                              :signer]}))))

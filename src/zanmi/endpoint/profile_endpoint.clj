@@ -44,14 +44,12 @@
 ;; request authentication / authorization                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-user-authenticated [db username {:keys [password] :as credentials}
-                                response-fn]
-  (if (= username (:username credentials))
-    (if-let [profile (-> (db/fetch db username)
-                         (authenticate password))]
-      (response-fn profile)
-      (error "bad username or password" 401))
-    (error "unauthorized" 409)))
+(defn- when-user-authenticated [db username identity response-fn]
+  (if identity
+    (if (= username (:username identity))
+      (response-fn identity)
+      (error "unauthorized" 409))
+    (error "bad username or password" 401)))
 
 (defn- when-valid-reset-token [signer reset-token username validated-fn]
   (if-let [payload (signer/unsign signer reset-token)]
@@ -110,27 +108,27 @@
       (let [attrs {:username username :password password}]
         (create-profile db profile-schema signer attrs)))
 
-    (context "/:username" [username :as {:keys [credentials]}]
+    (context "/:username" [username :as {:keys [identity]}]
       (PUT "/" [reset-token new-password]
         (letfn [(update-pw [profile]
                   (update-password db profile-schema signer profile
                                    new-password))]
           (if reset-token
             (when-valid-reset-token signer reset-token username update-pw)
-            (when-user-authenticated db username credentials update-pw))))
+            (when-user-authenticated db username identity update-pw))))
 
       (DELETE "/" []
-        (when-user-authenticated db username credentials
-          (fn [profile]
-            (delete-profile db profile))))
+        (when-user-authenticated db username identity
+                                 (fn [profile]
+                                   (delete-profile db profile))))
 
       (POST "/auth" []
-        (when-user-authenticated db username credentials
-          (fn [profile]
-            (show-auth-token signer profile))))
+        (when-user-authenticated db username identity
+                                 (fn [profile]
+                                   (show-auth-token signer profile))))
 
       (POST "/reset" [request-token]
         (when-api-authenticated api-validator request-token
-          (fn [payload]
-            (when-valid-reset-request db username payload
-              (fn [profile] (show-reset-token signer profile)))))))))
+                                (fn [payload]
+                                  (when-valid-reset-request db username payload
+                                                            (fn [profile] (show-reset-token signer profile)))))))))
