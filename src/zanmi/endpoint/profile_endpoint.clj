@@ -1,10 +1,11 @@
 (ns zanmi.endpoint.profile-endpoint
   (:require [zanmi.boundary.database :as db]
             [zanmi.boundary.signer :as signer]
-            [zanmi.data.profile :refer [authenticate create update]]
+            [zanmi.data.profile :refer [create update]]
             [zanmi.view.profile-view :refer [render-error render-message
                                              render-auth-token
                                              render-reset-token]]
+            [buddy.auth :refer [throw-unauthorized]]
             [clojure.core.match :refer [match]]
             [compojure.core :refer [context DELETE POST PUT]]
             [ring.util.response :as response :refer [response]]))
@@ -44,12 +45,15 @@
 ;; request authentication / authorization                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- when-user-authenticated [db username identity response-fn]
-  (if identity
-    (if (= username (:username identity))
-      (response-fn identity)
-      (error "unauthorized" 409))
-    (error "bad username or password" 401)))
+(defn- authenticate [identity]
+  (when-not identity
+    (throw-unauthorized {:reason :unauthenticated}))
+  identity)
+
+(defn- authorize [identity username]
+  (when-not (= (:username identity) username)
+    (throw-unauthorized {:reason :unauthorized}))
+  identity)
 
 (defn- when-valid-reset-token [signer reset-token username validated-fn]
   (if-let [payload (signer/unsign signer reset-token)]
@@ -115,17 +119,22 @@
                                    new-password))]
           (if reset-token
             (when-valid-reset-token signer reset-token username update-pw)
-            (when-user-authenticated db username identity update-pw))))
+            (-> identity
+                (authenticate)
+                (authorize username)
+                (update-pw)))))
 
       (DELETE "/" []
-        (when-user-authenticated db username identity
-                                 (fn [profile]
-                                   (delete-profile db profile))))
+        (-> identity
+            (authenticate)
+            (authorize username)
+            (as-> authorized (delete-profile db authorized))))
 
       (POST "/auth" []
-        (when-user-authenticated db username identity
-                                 (fn [profile]
-                                   (show-auth-token signer profile))))
+        (-> identity
+            (authenticate)
+            (authorize username)
+            (as-> authorized (show-auth-token signer authorized))))
 
       (POST "/reset" [request-token]
         (when-api-authenticated api-validator request-token

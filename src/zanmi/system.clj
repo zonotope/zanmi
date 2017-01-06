@@ -17,10 +17,10 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]))
 
 (def base-config
-  {:app {:middleware [[wrap-defaults :defaults]
+  {:app {:middleware [[wrap-authentication :db]
+                      [wrap-defaults :defaults]
                       [wrap-not-found :not-found]
                       [wrap-format :formats]
-                      [wrap-authentication :db]
                       [wrap-logger :logger]]
 
          :not-found "Resource Not Found"
