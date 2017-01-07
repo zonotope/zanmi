@@ -55,13 +55,10 @@
     (throw-unauthorized {:reason :unauthorized}))
   identity)
 
-(defn- when-valid-reset-token [signer reset-token username validated-fn]
-  (if-let [payload (signer/unsign signer reset-token)]
-    (if (and (= username (:username payload))
-             (= (:sub payload) "reset"))
-      (validated-fn payload)
-      (error "unauthorized" 409))
-    (error "invalid reset token" 401)))
+(defn- authorize-reset [reset-claim username]
+  (when-not (= username (:username reset-claim))
+    (throw-unauthorized {:reason :unauthorized}))
+  reset-claim)
 
 (defn- when-api-authenticated [validator request-token response-fn]
   (if-let [payload (signer/unsign validator request-token)]
@@ -112,17 +109,16 @@
       (let [attrs {:username username :password password}]
         (create-profile db profile-schema signer attrs)))
 
-    (context "/:username" [username :as {:keys [identity]}]
-      (PUT "/" [reset-token new-password]
-        (letfn [(update-pw [profile]
-                  (update-password db profile-schema signer profile
-                                   new-password))]
-          (if reset-token
-            (when-valid-reset-token signer reset-token username update-pw)
-            (-> identity
-                (authenticate)
-                (authorize username)
-                (update-pw)))))
+    (context "/:username" [username :as {:keys [identity reset-claim]}]
+      (PUT "/" [new-password]
+        (let [profile (if reset-claim
+                        (-> reset-claim
+                            (authorize-reset username)
+                            (as-> claim (db/fetch db (:username claim))))
+                        (-> identity
+                            (authenticate)
+                            (authorize username)))]
+          (update-password db profile-schema signer profile new-password)))
 
       (DELETE "/" []
         (-> identity
