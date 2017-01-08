@@ -15,7 +15,15 @@
         (error "invalid reset token" 401))
       (app req))))
 
-(defn wrap-authentication [app db signer]
+(defn- wrap-parse-api-token [app validater]
+  (fn [req]
+    (if-let [token (some-> req :params :app-token)]
+      (if-let [claims (signer/unsign validater token)]
+        (app (assoc req :app-claim claims))
+        (error "invalid app token" 401))
+      (app req))))
+
+(defn wrap-authentication [app db signer validater]
   (let [authenticate (fn [req {:keys [username password] :as creds}]
                        (when (and username password)
                          (-> (db/fetch db username)
@@ -29,4 +37,5 @@
     (-> app
         (buddy-middleware/wrap-authentication auth-backend)
         (wrap-parse-reset-token signer)
+        (wrap-parse-api-token validater)
         (buddy-middleware/wrap-authorization auth-backend))))

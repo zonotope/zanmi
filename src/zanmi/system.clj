@@ -17,7 +17,7 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]))
 
 (def base-config
-  {:app {:middleware [[wrap-authentication :db :signer]
+  {:app {:middleware [[wrap-authentication :db :signer :api-validater]
                       [wrap-defaults :defaults]
                       [wrap-not-found :not-found]
                       [wrap-format :formats]
@@ -47,7 +47,8 @@
          :signer           (signer (:signer config)))
 
         (component/system-using
-         {:app              [:db :logger :profile-endpoint :signer]
+         {:app              [:api-validater :db :logger :profile-endpoint
+                             :signer]
           :http             [:app]
           :profile-endpoint [:api-validator :db :logger :profile-schema
                              :signer]}))))

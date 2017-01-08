@@ -45,31 +45,22 @@
 ;; request authentication / authorization                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- authenticate [identity]
-  (when-not identity
+(defn- authorize [profile username]
+  (when-not profile
     (throw-unauthorized {:reason :unauthenticated}))
-  identity)
-
-(defn- authorize [identity username]
-  (when-not (= (:username identity) username)
+  (when-not (= (:username profile) username)
     (throw-unauthorized {:reason :unauthorized}))
-  identity)
+  profile)
 
 (defn- authorize-reset [reset-claim username]
   (when-not (= username (:username reset-claim))
     (throw-unauthorized {:reason :unauthorized}))
   reset-claim)
 
-(defn- when-api-authenticated [validator request-token response-fn]
-  (if-let [payload (signer/unsign validator request-token)]
-    (response-fn payload)
-    (error "invalid request token" 401)))
-
-(defn- when-valid-reset-request [db username payload response-fn]
-  (if (= username (:username payload))
-    (when-let [profile (db/fetch db username)]
-      (response-fn profile))
-    (error "mismatched usernames" 409)))
+(defn- authorize-app [app-claim username]
+  (when-not (= username (:username app-claim))
+    (throw-unauthorized {:reason :unauthorized}))
+  app-claim)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; actions                                                                  ;;
@@ -102,38 +93,35 @@
 ;; routes                                                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn profile-routes [{:keys [api-validator db profile-schema signer]
-                       :as endpoint}]
+(defn profile-routes [{:keys [db profile-schema signer] :as endpoint}]
   (context route-prefix []
     (POST "/" [username password]
       (let [attrs {:username username :password password}]
         (create-profile db profile-schema signer attrs)))
 
-    (context "/:username" [username :as {:keys [identity reset-claim]}]
+    (context "/:username" [username :as {:keys [app-claim identity
+                                                reset-claim]}]
       (PUT "/" [new-password]
         (let [profile (if reset-claim
                         (-> reset-claim
                             (authorize-reset username)
                             (as-> claim (db/fetch db (:username claim))))
                         (-> identity
-                            (authenticate)
                             (authorize username)))]
           (update-password db profile-schema signer profile new-password)))
 
       (DELETE "/" []
         (-> identity
-            (authenticate)
             (authorize username)
             (as-> authorized (delete-profile db authorized))))
 
       (POST "/auth" []
         (-> identity
-            (authenticate)
             (authorize username)
             (as-> authorized (show-auth-token signer authorized))))
 
       (POST "/reset" [request-token]
-        (when-api-authenticated api-validator request-token
-                                (fn [payload]
-                                  (when-valid-reset-request db username payload
-                                                            (fn [profile] (show-reset-token signer profile)))))))))
+        (-> app-claim
+            (authorize-app username)
+            (as-> claim (db/fetch db (:username claim)))
+            (as-> profile (show-reset-token signer profile)))))))
