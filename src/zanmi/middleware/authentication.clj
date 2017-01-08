@@ -28,14 +28,8 @@
                        (when (and username password)
                          (-> (db/fetch db username)
                              (profile/authenticate password))))
-        unauthorized (fn [req {:keys [reason] :as errdata}]
-                       (case reason
-                         :unauthenticated (error "bad username or password" 401)
-                         :unauthorized (error "unauthorized" 409)))
-        auth-backend (buddy-backend/basic {:authfn authenticate
-                                           :unauthorized-handler unauthorized})]
+        auth-backend (buddy-backend/basic {:authfn authenticate})]
     (-> app
         (buddy-middleware/wrap-authentication auth-backend)
         (wrap-parse-reset-token signer)
-        (wrap-parse-api-token validater)
-        (buddy-middleware/wrap-authorization auth-backend))))
+        (wrap-parse-api-token validater))))

@@ -36,7 +36,7 @@
 (defn new-system [config]
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
-         :api-validator    (sha-signer {:secret (:api-key config)
+         :api-validater    (sha-signer {:secret (:api-key config)
                                         :size 512})
          :app              (handler-component (:app config))
          :db               (database (:db config))
@@ -50,5 +50,5 @@
          {:app              [:api-validater :db :logger :profile-endpoint
                              :signer]
           :http             [:app]
-          :profile-endpoint [:api-validator :db :logger :profile-schema
+          :profile-endpoint [:api-validater :db :logger :profile-schema
                              :signer]}))))

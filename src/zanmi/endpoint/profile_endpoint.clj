@@ -5,7 +5,6 @@
             [zanmi.view.profile-view :refer [render-error render-message
                                              render-auth-token
                                              render-reset-token]]
-            [buddy.auth :refer [throw-unauthorized]]
             [clojure.core.match :refer [match]]
             [compojure.core :refer [context DELETE POST PUT]]
             [ring.util.response :as response :refer [response]]))
@@ -42,27 +41,6 @@
   (response (render-reset-token profile signer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; request authentication / authorization                                   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn- authorize [profile username]
-  (when-not profile
-    (throw-unauthorized {:reason :unauthenticated}))
-  (when-not (= (:username profile) username)
-    (throw-unauthorized {:reason :unauthorized}))
-  profile)
-
-(defn- authorize-reset [reset-claim username]
-  (when-not (= username (:username reset-claim))
-    (throw-unauthorized {:reason :unauthorized}))
-  reset-claim)
-
-(defn- authorize-app [app-claim username]
-  (when-not (= username (:username app-claim))
-    (throw-unauthorized {:reason :unauthorized}))
-  app-claim)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; actions                                                                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -90,6 +68,27 @@
   (reset profile signer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; request authorization                                                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- authorize-profile [profile username action]
+  (if profile
+    (if (= (:username profile) username)
+      (action profile)
+      (error "unauthorized" 409))
+    (error "bad username or password" 401)))
+
+(defn- authorize-reset [reset-claim username action]
+  (if (= (:username reset-claim) username)
+    (action reset-claim)
+    (error "unauthorized" 409)))
+
+(defn- authorize-app [app-claim username action]
+  (if (= (:username app-claim) username)
+    (action app-claim)
+    (error "unauthorized" 409)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; routes                                                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -102,26 +101,30 @@
     (context "/:username" [username :as {:keys [app-claim identity
                                                 reset-claim]}]
       (PUT "/" [new-password]
-        (let [profile (if reset-claim
-                        (-> reset-claim
-                            (authorize-reset username)
-                            (as-> claim (db/fetch db (:username claim))))
-                        (-> identity
-                            (authorize username)))]
-          (update-password db profile-schema signer profile new-password)))
+        (if reset-claim
+          (authorize-reset reset-claim username
+            (fn [{:keys [username] :as claim}]
+              (let [profile (db/fetch db claim)]
+                (update-password db profile-schema signer profile
+                                 new-password))))
+          (authorize-profile identity username
+            (fn [profile]
+              (update-password db profile-schema signer profile
+                               new-password)))))
 
       (DELETE "/" []
-        (-> identity
-            (authorize username)
-            (as-> authorized (delete-profile db authorized))))
+        (authorize-profile identity username
+          (fn [profile]
+            (when (db/delete! db username)
+              (deleted username)))))
 
       (POST "/auth" []
-        (-> identity
-            (authorize username)
-            (as-> authorized (show-auth-token signer authorized))))
+        (authorize-profile identity username
+          (fn [profile]
+            (show-auth-token signer profile))))
 
-      (POST "/reset" [request-token]
-        (-> app-claim
-            (authorize-app username)
-            (as-> claim (db/fetch db (:username claim)))
-            (as-> profile (show-reset-token signer profile)))))))
+      (POST "/reset" []
+        (authorize-app app-claim username
+          (fn [{:keys [username] :as claim}]
+            (let [profile (db/fetch db username)]
+              (show-reset-token signer profile))))))))
