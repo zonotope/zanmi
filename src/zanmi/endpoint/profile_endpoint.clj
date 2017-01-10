@@ -71,22 +71,24 @@
 ;; request authorization                                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- authorize-profile [profile username action]
-  (if profile
-    (if (= (:username profile) username)
-      (action profile)
+(defn- authorize [credentials username & {:keys [action unauth-message]} ]
+  (if credentials
+    (if (= (:username credentials) username)
+      (action credentials)
       (error "unauthorized" 409))
-    (error "bad username or password" 401)))
+    (error unauth-message 401)))
+
+(defn- authorize-profile [profile username action]
+  (authorize profile username
+             :action action :unauth-message "bad username or password"))
 
 (defn- authorize-reset [reset-claim username action]
-  (if (= (:username reset-claim) username)
-    (action reset-claim)
-    (error "unauthorized" 409)))
+  (authorize reset-claim username
+             :action action :unauth-message "invalid reset token"))
 
 (defn- authorize-app [app-claim username action]
-  (if (= (:username app-claim) username)
-    (action app-claim)
-    (error "unauthorized" 409)))
+  (authorize app-claim username
+             :action action :unauth-message "invalid app token"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; routes                                                                   ;;

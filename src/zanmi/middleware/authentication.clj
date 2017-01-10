@@ -2,7 +2,6 @@
   (:require [zanmi.boundary.database :as db]
             [zanmi.boundary.signer :as signer]
             [zanmi.data.profile :as profile]
-            [zanmi.util.response :refer [error]]
             [buddy.auth.backends :as buddy-backend]
             [buddy.auth.middleware :as buddy-middleware]))
 
