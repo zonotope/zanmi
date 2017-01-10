@@ -5,7 +5,9 @@
             [zanmi.component.signer.sha :refer [sha-signer]]
             [zanmi.data.profile :refer [profile-schema]]
             [zanmi.endpoint.profile-endpoint :refer [profile-routes]]
-            [zanmi.middleware.authentication :refer [wrap-authentication]]
+            [zanmi.middleware.authentication :refer [wrap-authentication
+                                                     wrap-parse-api-token
+                                                     wrap-parse-reset-token]]
             [zanmi.middleware.format :refer [wrap-format]]
             [zanmi.middleware.logger :refer [wrap-logger]]
             [com.stuartsierra.component :as component]
@@ -17,7 +19,9 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]))
 
 (def base-config
-  {:app {:middleware [[wrap-authentication :db :signer :api-validater]
+  {:app {:middleware [[wrap-authentication :db]
+                      [wrap-parse-api-token :api-validater]
+                      [wrap-parse-reset-token :signer]
                       [wrap-defaults :defaults]
                       [wrap-not-found :not-found]
                       [wrap-format :formats]

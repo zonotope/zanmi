@@ -155,11 +155,13 @@ database and database tables.
     [buddy](https://github.com/funcool/buddy) in Haitian Creole.
 
 ## TODO
+* Full OAUTH2 implementation
 * Configurable password hashing schemes (support for pbkdf2, scrypt, etc)
 * Password database back ends for MySQL, Cassandra, etc.
 * More configurable password strength validations
 * Shared sessions (possibly with Redis)
 * Validate zanmi configuration map with clojure.spec
+* More tests!
 
 ## Contributing
 Pull requests welcome!
