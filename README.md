@@ -78,7 +78,7 @@ Send a `post` request to the profiles url with your credentials to register a
 new user:
 
 ```bash
-curl -XPOST --data "username=gwcarver&password=pulverized peanuts" localhost:8686/profiles/
+curl -XPOST --data "profile[username]=gwcarver&profile[password]=pulverized peanuts" localhost:8686/profiles/
 ```
 
 zanmi uses [zxcvbn-clj](https://github.com/zonotope/zxcvbn-clj) to validate
@@ -107,7 +107,7 @@ with the existing credentials through basic auth and the new password in the
 request body:
 
 ```bash
-curl -XPUT -u "gwcarver:pulverized peanuts" --data "new-password=succulent sweet potatos" localhost:8686/profiles/gwcarver
+curl -XPUT -u "gwcarver:pulverized peanuts" --data "profile[password]=succulent sweet potatos" localhost:8686/profiles/gwcarver
 ```
 
 The server will respond with a new auth token if your credentials are correct

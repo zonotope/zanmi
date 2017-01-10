@@ -96,23 +96,21 @@
 
 (defn profile-routes [{:keys [db profile-schema signer] :as endpoint}]
   (context route-prefix []
-    (POST "/" [username password]
-      (let [attrs {:username username :password password}]
-        (create-profile db profile-schema signer attrs)))
+    (POST "/" [profile]
+      (create-profile db profile-schema signer profile))
 
     (context "/:username" [username :as {:keys [app-claim identity
                                                 reset-claim]}]
-      (PUT "/" [new-password]
-        (if reset-claim
-          (authorize-reset reset-claim username
-            (fn [{:keys [username] :as claim}]
-              (let [profile (db/fetch db claim)]
-                (update-password db profile-schema signer profile
-                                 new-password))))
-          (authorize-profile identity username
-            (fn [profile]
-              (update-password db profile-schema signer profile
-                               new-password)))))
+      (PUT "/" [profile]
+        (let [{:keys [password]} profile]
+          (if reset-claim
+            (authorize-reset reset-claim username
+              (fn [{:keys [username] :as claim}]
+                (let [profile (db/fetch db claim)]
+                  (update-password db profile-schema signer profile password))))
+            (authorize-profile identity username
+              (fn [profile]
+                (update-password db profile-schema signer profile password))))))
 
       (DELETE "/" []
         (authorize-profile identity username
