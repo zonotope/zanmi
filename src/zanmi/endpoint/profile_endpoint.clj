@@ -44,34 +44,34 @@
 ;; actions                                                                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- create-profile [db schema signer attrs]
+(defn- create-profile [attrs & {:keys [db schema signer]}]
   (-> (create schema attrs)
       (as-> validated (db/save! db validated))
       (match {:ok new-profile} (created new-profile signer)
              {:error messages} (error messages 409))))
 
-(defn- update-password [db schema signer profile new-password]
+(defn- update-password [profile new-password & {:keys [db schema signer]}]
   (let [username (:username profile)]
     (-> (update schema profile new-password)
         (as-> validated (db/set! db username validated))
         (match {:ok new-profile} (ok new-profile signer)
                {:error messages} (error messages 400)))))
 
-(defn- delete-profile [db {:keys [username] :as profile}]
+(defn- delete-profile [{:keys [username] :as profile} & {db :db}]
   (when (db/delete! db username)
     (deleted username)))
 
-(defn- show-auth-token [signer profile]
+(defn- show-auth-token [profile & {:keys [signer]}]
   (ok profile signer))
 
-(defn- show-reset-token [signer profile]
+(defn- show-reset-token [profile & {:keys [signer]}]
   (reset profile signer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; request authorization                                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- authorize [credentials username & {:keys [action unauth-message]} ]
+(defn- authorize [credentials username & {:keys [action unauth-message]}]
   (if credentials
     (if (= (:username credentials) username)
       (action credentials)
@@ -97,7 +97,7 @@
 (defn profile-routes [{:keys [db profile-schema signer] :as endpoint}]
   (context route-prefix []
     (POST "/" [profile]
-      (create-profile db profile-schema signer profile))
+      (create-profile profile :db db :schema profile-schema :signer signer))
 
     (context "/:username" [username :as {:keys [app-claim identity
                                                 reset-claim]}]
@@ -106,25 +106,28 @@
           (if reset-claim
             (authorize-reset reset-claim username
               (fn [{:keys [username] :as claim}]
-                (let [profile (db/fetch db claim)]
-                  (update-password db profile-schema signer profile password))))
+                (let [profile (db/fetch db username)]
+                  (update-password profile password
+                                   :db db :schema profile-schema
+                                   :signer signer))))
             (authorize-profile identity username
               (fn [profile]
-                (update-password db profile-schema signer profile password))))))
+                (update-password profile password
+                                 :db db :schema profile-schema
+                                 :signer signer))))))
 
       (DELETE "/" []
         (authorize-profile identity username
           (fn [profile]
-            (when (db/delete! db username)
-              (deleted username)))))
+            (delete-profile profile :db db))))
 
       (POST "/auth" []
         (authorize-profile identity username
           (fn [profile]
-            (show-auth-token signer profile))))
+            (show-auth-token profile :signer signer))))
 
       (POST "/reset" []
         (authorize-app app-claim username
           (fn [{:keys [username] :as claim}]
             (let [profile (db/fetch db username)]
-              (show-reset-token signer profile))))))))
+              (show-reset-token profile :signer signer))))))))
