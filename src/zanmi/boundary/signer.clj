@@ -21,3 +21,8 @@
         (select-keys [:id :username])
         (assoc :sub "reset", :iat now, :exp exp)
         (as-> data (sign signer data)))))
+
+(defn parse-reset-token [signer token]
+  (let [payload (unsign signer token)]
+    (when (= (:sub payload) "reset")
+      payload)))

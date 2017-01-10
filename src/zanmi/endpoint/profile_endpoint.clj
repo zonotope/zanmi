@@ -1,7 +1,7 @@
 (ns zanmi.endpoint.profile-endpoint
   (:require [zanmi.boundary.database :as db]
             [zanmi.boundary.signer :as signer]
-            [zanmi.data.profile :refer [authenticate create update]]
+            [zanmi.data.profile :refer [create update]]
             [zanmi.view.profile-view :refer [render-error render-message
                                              render-auth-token
                                              render-reset-token]]
@@ -41,38 +41,6 @@
   (response (render-reset-token profile signer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; request authentication / authorization                                   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn- when-user-authenticated [db username {:keys [password] :as credentials}
-                                response-fn]
-  (if (= username (:username credentials))
-    (if-let [profile (-> (db/fetch db username)
-                         (authenticate password))]
-      (response-fn profile)
-      (error "bad username or password" 401))
-    (error "unauthorized" 409)))
-
-(defn- when-valid-reset-token [signer reset-token username validated-fn]
-  (if-let [payload (signer/unsign signer reset-token)]
-    (if (and (= username (:username payload))
-             (= (:sub payload) "reset"))
-      (validated-fn payload)
-      (error "unauthorized" 409))
-    (error "invalid reset token" 401)))
-
-(defn- when-api-authenticated [validator request-token response-fn]
-  (if-let [payload (signer/unsign validator request-token)]
-    (response-fn payload)
-    (error "invalid request token" 401)))
-
-(defn- when-valid-reset-request [db username payload response-fn]
-  (if (= username (:username payload))
-    (when-let [profile (db/fetch db username)]
-      (response-fn profile))
-    (error "mismatched usernames" 409)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; actions                                                                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -100,37 +68,63 @@
   (reset profile signer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; request authorization                                                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- authorize-profile [profile username action]
+  (if profile
+    (if (= (:username profile) username)
+      (action profile)
+      (error "unauthorized" 409))
+    (error "bad username or password" 401)))
+
+(defn- authorize-reset [reset-claim username action]
+  (if (= (:username reset-claim) username)
+    (action reset-claim)
+    (error "unauthorized" 409)))
+
+(defn- authorize-app [app-claim username action]
+  (if (= (:username app-claim) username)
+    (action app-claim)
+    (error "unauthorized" 409)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; routes                                                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn profile-routes [{:keys [api-validator db profile-schema signer]
-                       :as endpoint}]
+(defn profile-routes [{:keys [db profile-schema signer] :as endpoint}]
   (context route-prefix []
     (POST "/" [username password]
       (let [attrs {:username username :password password}]
         (create-profile db profile-schema signer attrs)))
 
-    (context "/:username" [username :as {:keys [credentials]}]
-      (PUT "/" [reset-token new-password]
-        (letfn [(update-pw [profile]
-                  (update-password db profile-schema signer profile
-                                   new-password))]
-          (if reset-token
-            (when-valid-reset-token signer reset-token username update-pw)
-            (when-user-authenticated db username credentials update-pw))))
+    (context "/:username" [username :as {:keys [app-claim identity
+                                                reset-claim]}]
+      (PUT "/" [new-password]
+        (if reset-claim
+          (authorize-reset reset-claim username
+            (fn [{:keys [username] :as claim}]
+              (let [profile (db/fetch db claim)]
+                (update-password db profile-schema signer profile
+                                 new-password))))
+          (authorize-profile identity username
+            (fn [profile]
+              (update-password db profile-schema signer profile
+                               new-password)))))
 
       (DELETE "/" []
-        (when-user-authenticated db username credentials
+        (authorize-profile identity username
           (fn [profile]
-            (delete-profile db profile))))
+            (when (db/delete! db username)
+              (deleted username)))))
 
       (POST "/auth" []
-        (when-user-authenticated db username credentials
+        (authorize-profile identity username
           (fn [profile]
             (show-auth-token signer profile))))
 
-      (POST "/reset" [request-token]
-        (when-api-authenticated api-validator request-token
-          (fn [payload]
-            (when-valid-reset-request db username payload
-              (fn [profile] (show-reset-token signer profile)))))))))
+      (POST "/reset" []
+        (authorize-app app-claim username
+          (fn [{:keys [username] :as claim}]
+            (let [profile (db/fetch db username)]
+              (show-reset-token signer profile))))))))
