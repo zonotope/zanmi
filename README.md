@@ -29,7 +29,7 @@ SHA512 HMAC needs a secret supplied in the server config.
 
 To try it out in development:
 
-* download the latest release jar
+* download the latest [release jar](https://github.com/zonotope/zanmi/releases/download/0.1.0-SNAPSHOT/zanmi-0.1.0-SNAPSHOT-standalone.jar)
 
 * generate an RSA keypair with [openssl](https://www.openssl.org/) by running
   the following in a terminal, where `<keypair path>` is some path of your
