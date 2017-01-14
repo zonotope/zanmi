@@ -2,7 +2,7 @@
   (:gen-class)
   (:require [zanmi.boundary.database :as db]
             [zanmi.config :as config]
-            [zanmi.system :refer [new-system]]
+            [zanmi.system :refer [zanmi]]
             [com.stuartsierra.component :as component]
             [duct.middleware.errors :refer [wrap-hide-errors]]
             [duct.util.runtime :refer [add-shutdown-hook]]
@@ -33,7 +33,7 @@
 (defn -main [& args]
   (let [cli    (parse-command-line-args args)
         config (config-map cli)
-        system (new-system config)]
+        system (zanmi config)]
     (if (:init-db cli)
       (do (println "Inizializing zanmi database")
           (db/initialize! (:db system)))

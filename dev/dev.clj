@@ -21,8 +21,8 @@
               config/environ
               dev-config))
 
-(defn new-system []
-  (into (system/new-system config)
+(defn zanmi []
+  (into (system/zanmi config)
         {}))
 
 (when (io/resource "dev/local.clj")
@@ -30,4 +30,4 @@
 
 (gen/set-ns-prefix 'zanmi)
 
-(reloaded.repl/set-init! new-system)
+(reloaded.repl/set-init! zanmi)

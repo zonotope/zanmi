@@ -37,7 +37,7 @@
                                 :responses {:absolute-redirects true
                                             :not-modified-responses true}})}})
 
-(defn new-system [config]
+(defn zanmi [config]
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
          :api-validater    (sha-signer {:secret (:api-key config)

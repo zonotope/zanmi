@@ -24,12 +24,12 @@
         (app req-with-claim))
       (app req))))
 
-(defn wrap-parse-reset-token [app signer]
-  (wrap-parse-token-mw app signer
-                       :parse-fn signer/parse-reset-token :param :reset-token
-                       :claim-key :reset-claim))
-
 (defn wrap-parse-api-token [app validater]
   (wrap-parse-token-mw app validater
                        :parse-fn signer/unsign :param :app-token
                        :claim-key :app-claim))
+
+(defn wrap-parse-reset-token [app signer]
+  (wrap-parse-token-mw app signer
+                       :parse-fn signer/parse-reset-token :param :reset-token
+                       :claim-key :reset-claim))
