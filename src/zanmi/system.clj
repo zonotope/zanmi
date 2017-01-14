@@ -1,7 +1,8 @@
 (ns zanmi.system
   (:require [zanmi.component.database :refer [database]]
-            [zanmi.component.timbre :refer [timbre]]
+            [zanmi.component.immutant :refer [immutant-web-server]]
             [zanmi.component.signer :refer [signer]]
+            [zanmi.component.timbre :refer [timbre]]
             [zanmi.component.signer.sha :refer [sha-signer]]
             [zanmi.data.profile :refer [profile-schema]]
             [zanmi.endpoint.profile-endpoint :refer [profile-routes]]
@@ -15,7 +16,6 @@
             [duct.component.handler :refer [handler-component]]
             [duct.middleware.not-found :refer [wrap-not-found]]
             [meta-merge.core :refer [meta-merge]]
-            [ring.component.jetty :refer [jetty-server]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]))
 
 (def base-config
@@ -44,7 +44,7 @@
                                         :size 512})
          :app              (handler-component (:app config))
          :db               (database (:db config))
-         :http             (jetty-server (:http config))
+         :http             (immutant-web-server (:http config))
          :logger           (timbre (:logger config))
          :profile-endpoint (endpoint-component profile-routes)
          :profile-schema   (profile-schema (:profile-schema config))

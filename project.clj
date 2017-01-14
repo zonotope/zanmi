@@ -28,7 +28,7 @@
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
                  [ring/ring-ssl "0.2.1"]
-                 [ring-jetty-component "0.3.1"]
+                 [org.immutant/web "2.1.6"]
                  [ring-logger "0.7.6"]
                  [ring-middleware-format "0.7.0"]
 
