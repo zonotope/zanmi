@@ -20,7 +20,7 @@
 
 (def base-config
   {:app {:middleware [[wrap-authentication :db]
-                      [wrap-parse-api-token :api-validater]
+                      [wrap-parse-api-token :app-validater]
                       [wrap-parse-reset-token :signer]
                       [wrap-defaults :defaults]
                       [wrap-not-found :not-found]
@@ -40,7 +40,7 @@
 (defn zanmi [config]
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
-         :api-validater    (sha-signer {:secret (:api-key config)
+         :app-validater    (sha-signer {:secret (:api-key config)
                                         :size 512})
          :app              (handler-component (:app config))
          :db               (database (:db config))
@@ -51,8 +51,8 @@
          :signer           (signer (:signer config)))
 
         (component/system-using
-         {:app              [:api-validater :db :logger :profile-endpoint
+         {:app              [:app-validater :db :logger :profile-endpoint
                              :signer]
           :http             [:app]
-          :profile-endpoint [:api-validater :db :logger :profile-schema
+          :profile-endpoint [:app-validater :db :logger :profile-schema
                              :signer]}))))
