@@ -2,8 +2,10 @@
   (:require [zanmi.boundary.database :as db]
             [zanmi.boundary.signer :as signer]
             [zanmi.data.profile :as profile]
+            [zanmi.util.codec :refer [base64-decode]]
             [buddy.auth.backends :as buddy-backend]
-            [buddy.auth.middleware :as buddy-middleware]))
+            [buddy.auth.middleware :as buddy-middleware]
+            [clojure.string :as string]))
 
 (defn wrap-authentication [app db]
   (let [authenticate (fn [req {:keys [username password] :as creds}]
@@ -33,3 +35,18 @@
   (wrap-parse-token-mw app signer
                        :parse-fn signer/parse-reset-token :param :reset-token
                        :claim-key :reset-claim))
+
+(defn- parse-basic [headers db]
+  (some-> headers
+          (get "authorization")
+          (as-> header (re-find #"^Basic (.*)$" header))
+          (second)
+          (base64-decode)
+          (string/split #":" 2)
+          (as-> creds (let [[username password] creds]
+                        (-> (db/fetch db username)
+                            (profile/authenticate password))))))
+
+(defn wrap-parse-basic [app db]
+  (fn [{:keys [headers] :as req}]
+    (app (assoc req :user-profile (parse-basic headers db)))))
