@@ -82,12 +82,12 @@
   (authorize profile username
              :action action :unauth-message "bad username or password"))
 
-(defn- authorize-reset [reset-claim username action]
-  (authorize reset-claim username
+(defn- authorize-reset [reset-claims username action]
+  (authorize reset-claims username
              :action action :unauth-message "invalid reset token"))
 
-(defn- authorize-app [app-claim username action]
-  (authorize app-claim username
+(defn- authorize-app [app-claims username action]
+  (authorize app-claims username
              :action action :unauth-message "invalid app token"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -99,35 +99,35 @@
     (POST "/" [profile]
       (create-profile profile :db db :schema profile-schema :signer signer))
 
-    (context "/:username" [username :as {:keys [app-claim identity
-                                                reset-claim]}]
+    (context "/:username" [username :as {:keys [app-claims reset-claims
+                                                user-profile]}]
       (PUT "/" [profile]
         (let [{:keys [password]} profile]
-          (if reset-claim
-            (authorize-reset reset-claim username
-              (fn [{:keys [username] :as claim}]
+          (if reset-claims
+            (authorize-reset reset-claims username
+              (fn [{:keys [username] :as claims}]
                 (let [profile (db/fetch db username)]
                   (update-password profile password
                                    :db db :schema profile-schema
                                    :signer signer))))
-            (authorize-profile identity username
+            (authorize-profile user-profile username
               (fn [profile]
                 (update-password profile password
                                  :db db :schema profile-schema
                                  :signer signer))))))
 
       (DELETE "/" []
-        (authorize-profile identity username
+        (authorize-profile user-profile username
           (fn [profile]
             (delete-profile profile :db db))))
 
       (POST "/auth" []
-        (authorize-profile identity username
+        (authorize-profile user-profile username
           (fn [profile]
             (show-auth-token profile :signer signer))))
 
       (POST "/reset" []
-        (authorize-app app-claim username
-          (fn [{:keys [username] :as claim}]
+        (authorize-app app-claims username
+          (fn [{:keys [username] :as claims}]
             (let [profile (db/fetch db username)]
               (show-reset-token profile :signer signer))))))))

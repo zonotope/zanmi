@@ -2,51 +2,70 @@
   (:require [zanmi.boundary.database :as db]
             [zanmi.boundary.signer :as signer]
             [zanmi.data.profile :as profile]
-            [zanmi.util.codec :refer [base64-decode]]
-            [buddy.auth.backends :as buddy-backend]
-            [buddy.auth.middleware :as buddy-middleware]
+            [buddy.core.codecs :refer [bytes->str]]
+            [buddy.core.codecs.base64 :as base64]
             [clojure.string :as string]))
 
-(defn wrap-authentication [app db]
-  (let [authenticate (fn [req {:keys [username password] :as creds}]
-                       (when (and username password)
-                         (-> (db/fetch db username)
-                             (profile/authenticate password))))
-        auth-backend (buddy-backend/basic {:authfn authenticate})]
-    (-> app
-        (buddy-middleware/wrap-authentication auth-backend))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; header parsing                                                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn base64-decode [string]
+  (-> (base64/decode string)
+      (bytes->str)))
 
-(defn- wrap-parse-token-mw [app signer & {:keys [parse-fn param claim-key]}]
-  (fn [req]
-    (if-let [token (some-> req :params param)]
-      (let [req-with-claim (if-let [claims (parse-fn signer token)]
-                             (assoc req claim-key claims)
-                             req)]
-        (app req-with-claim))
-      (app req))))
-
-(defn wrap-parse-api-token [app validater]
-  (wrap-parse-token-mw app validater
-                       :parse-fn signer/unsign :param :app-token
-                       :claim-key :app-claim))
-
-(defn wrap-parse-reset-token [app signer]
-  (wrap-parse-token-mw app signer
-                       :parse-fn signer/parse-reset-token :param :reset-token
-                       :claim-key :reset-claim))
-
-(defn- parse-basic [headers db]
+(defn- parse-authorization [headers scheme]
   (some-> headers
           (get "authorization")
-          (as-> header (re-find #"^Basic (.*)$" header))
-          (second)
+          (as-> header (re-find (re-pattern (str "^" scheme " (.*)$")) header))
+          (second)))
+
+(defn parse-token [req token-name token-signer]
+  (some-> (:headers req)
+          (parse-authorization token-name)
+          (as-> token (signer/unsign token-signer token))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; application authentication                                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn parse-app-claims [req app-validater]
+  (parse-token req "ZanmiAppToken" app-validater))
+
+(defn wrap-app-claims [handler app-validater]
+  (fn [req]
+    (let [claims (parse-app-claims req app-validater)]
+      (handler (assoc req :app-claims claims)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; user credential authentication                                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- parse-credentials [req db]
+  (some-> (:headers req)
+          (parse-authorization "Basic")
           (base64-decode)
           (string/split #":" 2)
-          (as-> creds (let [[username password] creds]
-                        (-> (db/fetch db username)
-                            (profile/authenticate password))))))
+          (as-> creds (zipmap [:username :password] creds))))
 
-(defn wrap-parse-basic [app db]
-  (fn [{:keys [headers] :as req}]
-    (app (assoc req :user-profile (parse-basic headers db)))))
+(defn- authenticate-credentials [{:keys [username password] :as creds} db]
+  (-> (db/fetch db username)
+      (profile/authenticate password)))
+
+(defn wrap-user-credentials [handler db]
+  (fn [req]
+    (let [creds (parse-credentials req db)
+          authenticated (authenticate-credentials creds db)]
+      (handler (assoc req :user-profile authenticated)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; user reset token authentication                                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- parse-reset-claims [req signer]
+  (parse-token req "ZanmiResetToken" signer))
+
+(defn wrap-reset-claims [handler signer]
+  (fn [req]
+    (let [claims (parse-reset-claims req signer)]
+      (handler (assoc req :reset-claims claims)))))
