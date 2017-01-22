@@ -1,5 +1,6 @@
 # zanmi
 [![Clojars Project](https://img.shields.io/clojars/v/zanmi.svg)](https://clojars.org/zanmi)
+[![Build Status](https://travis-ci.org/zonotope/zanmi.svg?branch=master)](https://travis-ci.org/zonotope/zanmi)
 
 An HTTP identity service based on JWT auth tokens, and built
 on [buddy](https://github.com/funcool/buddy). Authenticate users while managing
