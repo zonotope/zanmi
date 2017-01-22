@@ -1,4 +1,4 @@
-(defproject zanmi "0.1.0-SNAPSHOT"
+(defproject zanmi "0.1.0-alpha0"
   :description "Identity http service"
 
   :url "https://github.com/zonotope/zanmi"
