@@ -1,5 +1,4 @@
 # zanmi
-[![Clojars Project](https://img.shields.io/clojars/v/zanmi.svg)](https://clojars.org/zanmi)
 [![Build Status](https://travis-ci.org/zonotope/zanmi.svg?branch=master)](https://travis-ci.org/zonotope/zanmi)
 
 An HTTP identity service based on JWT auth tokens, and built
@@ -17,8 +16,8 @@ but
 [SHA512 HMAC](https://en.wikipedia.org/wiki/SHA-2) are also supported.
 
 ## Project Maturity
-zanmi is currently considered alpha software. There are probably bugs, and the
-api will most likely change.
+zanmi is still alpha software. There are probably bugs, and the api will most
+likely change.
 
 ## Usage
 zanmi is designed to be deployed with SSL/TLS in production. User passwords will
