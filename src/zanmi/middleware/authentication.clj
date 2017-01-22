@@ -15,10 +15,11 @@
       (bytes->str)))
 
 (defn- parse-authorization [headers scheme]
-  (some-> headers
-          (get "authorization")
-          (as-> header (re-find (re-pattern (str "^" scheme " (.*)$")) header))
-          (second)))
+  (let [scheme-pattern (re-pattern (str "^" scheme " (.*)$"))]
+    (some-> headers
+            (get "authorization")
+            (as-> header (re-find scheme-pattern header))
+            (second))))
 
 (defn parse-token [req token-name token-signer]
   (some-> (:headers req)
@@ -49,8 +50,9 @@
           (as-> creds (zipmap [:username :password] creds))))
 
 (defn- authenticate-credentials [{:keys [username password] :as creds} db]
-  (-> (db/fetch db username)
-      (profile/authenticate password)))
+  (when (and username password)
+    (some-> (db/fetch db username)
+            (profile/authenticate password))))
 
 (defn wrap-user-credentials [handler db]
   (fn [req]
