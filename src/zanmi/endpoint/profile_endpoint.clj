@@ -80,15 +80,15 @@
 
 (defn- authorize-profile [profile username action]
   (authorize profile username
-             :action action :unauth-message "bad username or password"))
+             :action action, :unauth-message "bad username or password"))
 
 (defn- authorize-reset [reset-claims username action]
   (authorize reset-claims username
-             :action action :unauth-message "invalid reset token"))
+             :action action, :unauth-message "invalid reset token"))
 
 (defn- authorize-app [app-claims username action]
   (authorize app-claims username
-             :action action :unauth-message "invalid app token"))
+             :action action, :unauth-message "invalid app token"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; routes                                                                   ;;
