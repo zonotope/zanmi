@@ -15,7 +15,7 @@
 
 (def ^:private route-prefix "/profiles")
 
-(defn- resource-url [{username :username :as profile}]
+(defn- profile-url [{username :username :as profile}]
   (str route-prefix "/" username))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -23,7 +23,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- created [profile signer]
-  (response/created (resource-url profile)
+  (response/created (profile-url profile)
                     (render-auth-token profile signer)))
 
 (defn- deleted [username]
@@ -97,7 +97,7 @@
 (defn profile-routes [{:keys [db profile-schema signer] :as endpoint}]
   (context route-prefix []
     (POST "/" [profile]
-      (create-profile profile :db db :schema profile-schema :signer signer))
+      (create-profile profile :db db, :schema profile-schema, :signer signer))
 
     (context "/:username" [username :as {:keys [app-claims reset-claims
                                                 user-profile]}]
@@ -108,12 +108,12 @@
               (fn [{:keys [username] :as claims}]
                 (let [profile (db/fetch db username)]
                   (update-password profile password
-                                   :db db :schema profile-schema
+                                   :db db, :schema profile-schema
                                    :signer signer))))
             (authorize-profile user-profile username
               (fn [profile]
                 (update-password profile password
-                                 :db db :schema profile-schema
+                                 :db db, :schema profile-schema
                                  :signer signer))))))
 
       (DELETE "/" []

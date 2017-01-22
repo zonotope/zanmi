@@ -15,6 +15,10 @@ but
 [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) and
 [SHA512 HMAC](https://en.wikipedia.org/wiki/SHA-2) are also supported.
 
+## Project Maturity
+zanmi is currently considered alpha software. There are probably bugs, and the
+api will most likely change.
+
 ## Usage
 zanmi is designed to be deployed with SSL/TLS in production. User passwords will
 be sent in the clear otherwise.
@@ -44,8 +48,10 @@ To try it out in development:
 * run either a PostgreSQL or MongoDB server including a database user that can
   update and delete databases.
 
-* download and edit the example config by adding a random string as an api key
-  and replacing the keypair paths and database credentials with your own.
+* download and edit the
+  [example config](https://github.com/zonotope/zanmi/blob/master/config.edn.example)
+  by adding a random string as an api key and replacing the keypair paths and
+  database credentials with your own.
 
 * initialize the database by running:
 
@@ -53,8 +59,8 @@ To try it out in development:
   ZANMI_CONFIG=<path to edited config> java -jar <zanmi release jar> --init-db
   ```
 
-* zanmi was designed to be run with ssl, but we'll turn it off just for this
-  demonstration. start the server by running:
+* zanmi was designed to be run with ssl, but we'll turn it off for now. Start
+  the server by running:
 
   ```sh
   ZANMI_CONFIG=<path to edited config> java -jar <zanmi release jar> --skip-ssl
@@ -65,9 +71,9 @@ the config). zanmi speaks json by default, but can also use transit/json if you
 set the request's accept/content-type headers.
 
 ### Clients
-There is a [Clojure zanmi client](https://github.com/zonotope/zanmi-client) in
-development, and since zanmi is just an http server, clients for other languages
-should be easy to write as long as those languages have a good http library.
+There is a [Clojure zanmi client](https://github.com/zonotope/zanmi-client), and
+since zanmi is just a plain http server, clients for other languages should be
+easy to write as long as those languages have good http and jwt libraries.
 
 We'll use [cURL](https://curl.haxx.se) to make requests to the running server to
 be as general as possible. Enter the following commands into a new terminal
@@ -114,10 +120,17 @@ The server will respond with a new auth token if your credentials are correct
 and the new password is strong enough according to zxcvbn
 
 ##### With a Reset Token
-zanmi also supports resetting user passwords if they've forgotten them. More
-support for reset tokens through raw http requests will be added soon, but see
-the clojure client, where it's fully supported, for more information.
+zanmi also supports resetting user passwords if they've forgotten them. First,
+create a JWT of the hash `{"username" : <username value> }` sha512 signed with
+the api-key from the zanmi config. Then send the same `put` request as above,
+but change the authorization header value to `ZanmiResetToken <reset token>`.
 
+The [clojure zanmi client](https://github.com/zonotope/zanmi-client) builds the
+authorization JWT used to get the reset token automatically.
+
+In production, your back-end application should request the reset token and send
+that to the user's email, or some other trusted channel that will verify their
+identity.
 
 #### Removing User Profiles
 
@@ -132,9 +145,13 @@ curl -XDELETE -u "gwcarver:succulent sweet potatos" localhost:8686/profiles/gwca
 ## Deployment
 
 ### Configuration
-See the [example config]() for configuration options. You can also set the
-configuration from the environment. See `environ` in `src/zanmi/config.clj` for
-environment variable overrides.
+See the
+[example config](https://github.com/zonotope/zanmi/blob/master/config.edn.example)
+for configuration options. The easiest way to configure zanmi is to edit the
+example config file linked above and set the `ZANMI_CONFIG` environment variable
+when running the relase jar. You can also set the configuration from the
+environment. See `environ` in `src/zanmi/config.clj` for environment variable
+overrides.
 
 ### Database Initialization
 PostgreSQL and MongoDB are the only databases supported currently, but pull
@@ -144,6 +161,13 @@ There are no migrations. Use the `--init-db` command line switch to set up the
 database and database tables.
 
 ## FAQs
+* What about OAuth?
+  - While I do have plans to implement an OAuth2 provider based on zanmi
+    eventually, full OAuth2 support was a little overkill for my immediate use
+    case. I wrote zanmi because I primarily wanted to (1) share user
+    authentication among decoupled services and (2) isolate user password
+    storage from all the other application data.
+
 * How do users log out?
   - zanmi only supports password database management and stateless
     authentication, so there is no session management. Client applications are
@@ -155,7 +179,7 @@ database and database tables.
     [buddy](https://github.com/funcool/buddy) in Haitian Creole.
 
 ## TODO
-* Full OAUTH2 implementation
+* Full OAuth2 implementation
 * Configurable password hashing schemes (support for pbkdf2, scrypt, etc)
 * Password database back ends for MySQL, Cassandra, etc.
 * More configurable password strength validations
