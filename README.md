@@ -122,8 +122,21 @@ and the new password is strong enough according to zxcvbn
 ##### With a Reset Token
 zanmi also supports resetting user passwords if they've forgotten them. First,
 create a JWT of the hash `{"username" : <username value> }` sha512 signed with
-the api-key from the zanmi config. Then send the same `put` request as above,
-but change the authorization header value to `ZanmiResetToken <reset token>`.
+the api-key from the zanmi config and send a `post` request with that JWT as the
+`ZanmiAppToken` in the authorization header to get a reset token
+for that user:
+
+```bash
+curl -XPOST -H "Authorization: ZanmiAppToken <jwt>" localhost:8686/profiles/gwcarver/reset
+```
+
+Then send the same `put` request as resetting with the current password above,
+but change the authorization header value to `ZanmiResetToken <reset token>`,
+where `<reset token>`.
+
+```bash
+curl -XPUT -H "Authorization: ZanmiResetToken <reset token>" --data "profile[password]=succulent sweet potatos" localhost:8686/profiles/gwcarver
+```
 
 The [clojure zanmi client](https://github.com/zonotope/zanmi-client) builds the
 authorization JWT used to get the reset token automatically.
