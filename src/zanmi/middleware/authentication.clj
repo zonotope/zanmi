@@ -14,24 +14,20 @@
   (-> (base64/decode string)
       (bytes->str)))
 
-(defn- parse-authorization [headers scheme]
+(defn- parse-authorization [req scheme]
   (let [scheme-pattern (re-pattern (str "^" scheme " (.*)$"))]
-    (some-> headers
+    (some-> (:headers req)
             (get "authorization")
             (as-> header (re-find scheme-pattern header))
             (second))))
-
-(defn parse-token [req token-name token-signer]
-  (some-> (:headers req)
-          (parse-authorization token-name)
-          (as-> token (signer/unsign token-signer token))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; application authentication                                               ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn parse-app-claims [req app-validater]
-  (parse-token req "ZanmiAppToken" app-validater))
+  (->> (parse-authorization req "ZanmiAppToken")
+       (signer/unsign app-validater)))
 
 (defn wrap-app-claims [handler app-validater]
   (fn [req]
@@ -43,8 +39,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- parse-credentials [req db]
-  (some-> (:headers req)
-          (parse-authorization "Basic")
+  (some-> (parse-authorization req "Basic")
           (base64-decode)
           (string/split #":" 2)
           (as-> creds (zipmap [:username :password] creds))))
@@ -65,7 +60,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- parse-reset-claims [req signer]
-  (parse-token req "ZanmiResetToken" signer))
+  (->> (parse-authorization req "ZanmiResetToken")
+       (signer/parse-reset-token signer)))
 
 (defn wrap-reset-claims [handler signer]
   (fn [req]
