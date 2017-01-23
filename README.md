@@ -1,7 +1,6 @@
-# zanmi
-[![Build Status](https://travis-ci.org/zonotope/zanmi.svg?branch=master)](https://travis-ci.org/zonotope/zanmi)
+# zanmi [![Build Status](https://travis-ci.org/zonotope/zanmi.svg?branch=master)](https://travis-ci.org/zonotope/zanmi)
 
-An HTTP identity service based on JWT auth tokens, and built
+An very simple HTTP identity service based on JWT auth tokens, and built
 on [buddy](https://github.com/funcool/buddy). Authenticate users while managing
 their passwords and auth tokens independently of the apps or services they use.
 
@@ -14,6 +13,9 @@ configurable. [RSASSA-PSS](https://en.wikipedia.org/wiki/PKCS_1) is the default,
 but
 [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) and
 [SHA512 HMAC](https://en.wikipedia.org/wiki/SHA-2) are also supported.
+
+Other back-end services can then authenticate users by verifying these auth
+tokens with the zanmi keypair's public key.
 
 ## Project Maturity
 zanmi is still alpha software. There are probably bugs, and the api will most
