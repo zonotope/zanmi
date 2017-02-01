@@ -16,7 +16,7 @@
                  [buddy/buddy-auth "1.3.0"]
                  [buddy/buddy-hashers "0.14.0"]
                  [buddy/buddy-sign "1.1.0"]
-                 [zxcvbn-clj "0.1.0-SNAPSHOT"]
+                 [zxcvbn-clj "0.1.0-alpha0"]
 
                  [funcool/clojure.jdbc "0.9.0"]
                  [hikari-cp "1.7.3"]
