@@ -1,6 +1,6 @@
 # zanmi [![Build Status](https://travis-ci.org/zonotope/zanmi.svg?branch=master)](https://travis-ci.org/zonotope/zanmi)
 
-An very simple HTTP identity service based on JWT auth tokens, and built
+An HTTP identity service based on JWT auth tokens, and built
 on [buddy](https://github.com/funcool/buddy). Authenticate users while managing
 their passwords and auth tokens independently of the apps or services they use.
 
@@ -35,7 +35,7 @@ SHA512 HMAC needs a secret supplied in the server config.
 
 To try it out in development:
 
-* download the latest [release jar](https://github.com/zonotope/zanmi/releases/download/0.1.0-SNAPSHOT/zanmi-0.1.0-SNAPSHOT-standalone.jar)
+* download the latest [release jar](https://github.com/zonotope/zanmi/releases/download/0.1.0-alpha0/zanmi-0.1.0-alpha0-standalone.jar)
 
 * generate an RSA keypair with [openssl](https://www.openssl.org/) by running
   the following in a terminal, where `<keypair path>` is some path of your
