@@ -10,12 +10,12 @@
                  [org.clojure/data.codec "0.1.0"]
 
                  [com.stuartsierra/component "0.3.1"]
-                 [compojure "1.5.0"]
+                 [compojure "1.5.2"]
                  [duct "0.7.0"]
 
                  [buddy/buddy-auth "1.3.0"]
-                 [buddy/buddy-hashers "0.14.0"]
-                 [buddy/buddy-sign "1.1.0"]
+                 [buddy/buddy-hashers "1.2.0"]
+                 [buddy/buddy-sign "1.3.0"]
                  [zxcvbn-clj "0.1.0-alpha0"]
 
                  [funcool/clojure.jdbc "0.9.0"]
