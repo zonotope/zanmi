@@ -26,8 +26,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn parse-app-claims [req app-validater]
-  (->> (parse-authorization req "ZanmiAppToken")
-       (signer/unsign app-validater)))
+  (some->> (parse-authorization req "ZanmiAppToken")
+           (signer/unsign app-validater)))
 
 (defn wrap-app-claims [handler app-validater]
   (fn [req]
@@ -60,8 +60,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- parse-reset-claims [req signer]
-  (->> (parse-authorization req "ZanmiResetToken")
-       (signer/parse-reset-token signer)))
+  (some->> (parse-authorization req "ZanmiResetToken")
+           (signer/parse-reset-token signer)))
 
 (defn wrap-reset-claims [handler signer]
   (fn [req]
