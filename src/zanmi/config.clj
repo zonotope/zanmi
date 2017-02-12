@@ -11,6 +11,8 @@
 (def environ
   {:api-key (:api-key env)
 
+   :app {:allowed-origins (:allowed-origins env)}
+
    :db {:engine (some-> env :db-engine symbol)
         :username (:db-username env)
         :password (:db-password env)
@@ -37,5 +39,9 @@
 
 (def file
   (when-let [path (:zanmi-config env)]
-    (with-open [reader (-> path io/reader PushbackReader.)]
-      (edn/read reader))))
+    (let [file-config (with-open [reader (-> path io/reader PushbackReader.)]
+                        (edn/read reader))
+          allowed-origins (:allowed-origins file-config)]
+      (-> file-config
+          (dissoc :allowed-origins)
+          (assoc :app {:allowed-origins allowed-origins})))))

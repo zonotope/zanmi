@@ -25,10 +25,11 @@
 
                  [com.novemberain/monger "3.0.2"]
 
+                 [org.immutant/web "2.1.6"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
                  [ring/ring-ssl "0.2.1"]
-                 [org.immutant/web "2.1.6"]
+                 [ring-cors "0.1.9"]
                  [ring-logger "0.7.6"]
                  [ring-middleware-format "0.7.0"]
 
@@ -72,6 +73,6 @@
 
                    :repl-options {:init-ns user}
 
-                   :env {:zanmi-config "resources/zanmi/config.edn"}}
+                   :env {:zanmi-config "dev/resources/zanmi/config.edn"}}
 
    :project/test  {}})

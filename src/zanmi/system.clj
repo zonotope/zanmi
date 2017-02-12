@@ -9,6 +9,7 @@
             [zanmi.middleware.authentication :refer [wrap-user-credentials
                                                      wrap-app-claims
                                                      wrap-reset-claims]]
+            [zanmi.middleware.cors :refer [wrap-cors]]
             [zanmi.middleware.format :refer [wrap-format]]
             [zanmi.middleware.logger :refer [wrap-logger]]
             [com.stuartsierra.component :as component]
@@ -19,23 +20,24 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]))
 
 (def base-config
-  {:app {:middleware [[wrap-user-credentials :db]
+  {:app {:middleware [[wrap-defaults :defaults]
+                      [wrap-cors :allowed-origins]
+                      [wrap-user-credentials :db]
                       [wrap-app-claims :app-validater]
                       [wrap-reset-claims :signer]
-                      [wrap-defaults :defaults]
                       [wrap-not-found :not-found]
                       [wrap-format :formats]
                       [wrap-logger :logger]]
-
-         :not-found "Resource Not Found"
-
-         :formats [:json :transit-json]
 
          :defaults (meta-merge api-defaults
                                {:params {:keywordize true
                                          :nested true}
                                 :responses {:absolute-redirects true
-                                            :not-modified-responses true}})}})
+                                            :not-modified-responses true}})
+
+         :formats [:json :transit-json]
+
+         :not-found "Resource Not Found"}})
 
 (defn zanmi [config]
   (let [config (meta-merge base-config config)]

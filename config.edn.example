@@ -1,6 +1,9 @@
 {;; random string used to sign requests for reset tokens
  :api-key "123-456-789-abc-def-ghi"
 
+ ;; cors settings
+ :allowed-origins ["https://example1.com", "https://example2.com"]
+
  ;; database credentials
  :db {:engine :postgres
       :username "zanmi"

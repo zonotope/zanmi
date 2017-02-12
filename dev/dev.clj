@@ -13,7 +13,8 @@
             [zanmi.config :as config]
             [zanmi.system :as system]))
 
-(def dev-config {:app {:middleware [wrap-stacktrace]}})
+(def dev-config {:app {:allowed-origins ["http://localhost:3000"]
+                       :middleware [wrap-stacktrace]}})
 
 (def config
   (meta-merge config/defaults
