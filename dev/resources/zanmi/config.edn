@@ -1,6 +1,6 @@
 {:api-key "unlock this door!"
 
- :allowed-origins ["http://localhost:8686"]
+ :allowed-origins ["http://localhost:3000"]
 
  :db {:engine :postgres
       :username "zanmi"

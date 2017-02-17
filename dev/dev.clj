@@ -1,6 +1,8 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [clojure.repl :refer :all]
+  (:require [zanmi.config :as config]
+            [zanmi.system :as system]
+            [clojure.repl :refer :all]
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
             [clojure.java.io :as io]
@@ -9,9 +11,7 @@
             [meta-merge.core :refer [meta-merge]]
             [reloaded.repl :refer [system init start stop go reset]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
-            [dev.tasks :refer :all]
-            [zanmi.config :as config]
-            [zanmi.system :as system]))
+            [dev.tasks :refer :all]))
 
 (def dev-config {:app {:allowed-origins ["http://localhost:3000"]
                        :middleware [wrap-stacktrace]}})
